@@ -1,0 +1,20 @@
+name: Dirty
+description: Quick and dirty access to NBT and CBS code
+author: StarTux
+version: 0.1
+api-version: 1.13
+main: com.cavetale.dirty.DirtyPlugin
+depend: []
+softdepend: []
+commands:
+  dirty:
+    aliases: []
+    description: dirty
+    permission: dirty.dirty
+    usage: /<command>
+permissions:
+  dirty.dirty:
+    description: use /dirty
+    default: false
+    children:
+    - dirty.child: true
