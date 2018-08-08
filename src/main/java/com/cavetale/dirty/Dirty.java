@@ -31,6 +31,8 @@ import org.bukkit.craftbukkit.v1_13_R1.inventory.CraftItemStack;
 public final class Dirty {
     private static Field fieldCraftItemStackHandle = null;
 
+    private Dirty() { }
+
     /**
      * Turn an NBT Tag into a JSON compatible object.  Works
      * recursively on Compounds and Lists.
@@ -115,7 +117,7 @@ public final class Dirty {
         } else if (value instanceof Double) {
             return new NBTTagDouble((Double)value);
         } else if (value instanceof Boolean) {
-            return new NBTTagInt((Boolean)value ? 1: 0);
+            return new NBTTagInt((Boolean)value ? 1 : 0);
         } else if (value instanceof byte[]) {
             return new NBTTagByteArray((byte[])value);
         } else if (value instanceof int[]) {
