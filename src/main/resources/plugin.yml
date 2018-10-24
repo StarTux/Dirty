@@ -1,0 +1,24 @@
+main: com.cavetale.dirty.DirtyPlugin
+name: Dirty
+version: '0.1'
+api-version: '1.13'
+description: Quick and dirty access to NBT and CBS code
+author: StarTux
+website: https://cavetale.com
+commands:
+  dirty:
+    description: Get information about NBT tags
+    permission: dirty.dirty
+    usage: |-
+      Usage:
+        /dirty item OPTIONS... - Item in hand
+        /dirty entity OPTIONS... - Entity
+        /dirty block OPTIONS... - Block
+        /dirty cancel - Cancel info
+      Options:
+        console - Print to console
+        pretty - Pretty print
+permissions:
+  dirty.dirty:
+    descripton: Use /dirty
+    default: op
