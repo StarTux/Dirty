@@ -6,10 +6,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import net.minecraft.server.v1_13_R2.Entity;
 import net.minecraft.server.v1_13_R2.ItemStack;
 import net.minecraft.server.v1_13_R2.NBTBase;
+import net.minecraft.server.v1_13_R2.NBTList;
 import net.minecraft.server.v1_13_R2.NBTTagByte;
 import net.minecraft.server.v1_13_R2.NBTTagByteArray;
 import net.minecraft.server.v1_13_R2.NBTTagCompound;
@@ -28,13 +30,19 @@ import org.bukkit.craftbukkit.v1_13_R2.block.CraftBlockEntityState;
 import org.bukkit.craftbukkit.v1_13_R2.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
 
+/**
+ * Utility class to get or set item, entity, or block NBT data.
+ * Items may be accessed directly; for the other two one has to load,
+ * modify, store.
+ */
 public final class Dirty {
     private static Field fieldCraftItemStackHandle = null;
-
     private Dirty() { }
 
+    // --- NBT-Container converstion
+
     /**
-     * Turn an NBT Tag into a JSON compatible object.  Works
+     * Turn an NBT Tag into a corresponding Container object.  Works
      * recursively on Compounds and Lists.
      */
     public static Object fromTag(NBTBase value) {
@@ -80,8 +88,7 @@ public final class Dirty {
             long[] l = (long[])((NBTTagLongArray)value).d();
             return Arrays.stream(l).boxed().collect(Collectors.toList());
         } else {
-            System.err.println("TagWrapper.fromTag: Unsupported value type: " + value.getClass().getName());
-            return value.toString();
+            throw new IllegalArgumentException("TagWrapper.fromTag: Unsupported value type: " + value.getClass().getName());
         }
     }
 
@@ -125,8 +132,7 @@ public final class Dirty {
         } else if (value instanceof long[]) {
             return new NBTTagLongArray((long[])value);
         } else {
-            System.err.println("TagWrapper.toTag: Unsupported value type: " + value.getClass().getName());
-            return new NBTTagString(value.toString());
+            throw new IllegalArgumentException("TagWrapper.toTag: Unsupported value type: " + value.getClass().getName());
         }
     }
 
@@ -142,12 +148,15 @@ public final class Dirty {
         return fieldCraftItemStackHandle;
     }
 
+    // --- Container getters and setters
+
     public static Map<String, Object> getItemTag(org.bukkit.inventory.ItemStack bukkitItem) {
         try {
             if (!(bukkitItem instanceof CraftItemStack)) return null;
             CraftItemStack obcItem = (CraftItemStack)bukkitItem;
             getFieldCraftItemStackHandle().setAccessible(true);
             ItemStack nmsItem = (ItemStack)fieldCraftItemStackHandle.get(obcItem);
+            if (nmsItem == null) return null;
             NBTTagCompound tag = nmsItem.getTag();
             return (Map<String, Object>)fromTag(tag);
         } catch (Exception e) {
@@ -219,5 +228,69 @@ public final class Dirty {
         Entity nmsEntity = ((CraftEntity)entity).getHandle();
         NBTTagCompound tag = (NBTTagCompound)toTag(json);
         nmsEntity.f(tag);
+    }
+
+    // --- Item NBT access operations
+
+    public static Optional<Object> accessItemNBT(org.bukkit.inventory.ItemStack bukkitItem, boolean create) {
+        try {
+            if (!(bukkitItem instanceof CraftItemStack)) return null;
+            CraftItemStack obcItem = (CraftItemStack)bukkitItem;
+            getFieldCraftItemStackHandle().setAccessible(true);
+            ItemStack nmsItem = (ItemStack)fieldCraftItemStackHandle.get(obcItem);
+            NBTTagCompound tag = nmsItem.getTag();
+            if (tag == null) {
+                if (create) {
+                    tag = new NBTTagCompound();
+                    nmsItem.setTag(tag);
+                }
+            }
+            return Optional.of(tag);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static CraftItemStack newCraftItemStack(org.bukkit.Material bukkitMaterial) {
+        return CraftItemStack.asCraftCopy(new org.bukkit.inventory.ItemStack(bukkitMaterial));
+    }
+
+    public static CraftItemStack toCraftItemStack(org.bukkit.inventory.ItemStack bukkitItem) {
+        if (bukkitItem instanceof CraftItemStack) return (CraftItemStack)bukkitItem;
+        ItemStack nmsItem = CraftItemStack.asNMSCopy(bukkitItem);
+        return CraftItemStack.asCraftMirror(nmsItem);
+    }
+
+    // --- NBT modification
+
+    public static void setNBT(Optional<Object> opt, String key, Object value) {
+        if (!opt.isPresent()) throw new NullPointerException("Tag cannot be null");
+        if (!(opt.get() instanceof NBTTagCompound)) throw new IllegalArgumentException("Expected tag compound: " + opt.get().getClass().getName());
+        NBTTagCompound tag = (NBTTagCompound)opt.get();
+        if (value == null) {
+            tag.remove(key);
+        } else {
+            tag.set(key, toTag(value));
+        }
+    }
+
+    public static Optional<Object> getNBT(Optional<Object> opt, String key) {
+        if (!opt.isPresent()) throw new NullPointerException("Tag cannot be null");
+        if (!(opt.get() instanceof NBTTagCompound)) throw new IllegalArgumentException("Expected tag compound: " + opt.get().getClass().getName());
+        NBTTagCompound tag = (NBTTagCompound)opt.get();
+        return Optional.of(tag.get(key));
+    }
+
+    public static Optional<Object> getNBT(Optional<Object> opt, int index) {
+        if (!opt.isPresent()) throw new NullPointerException("Tag cannot be null");
+        if (opt.get() instanceof NBTTagList) {
+            NBTTagList tag = (NBTTagList)opt.get();
+            return Optional.of(tag.get(index));
+        } else if (opt.get() instanceof NBTList) {
+            NBTList tag = (NBTList)opt.get();
+            return Optional.of(tag.get(index));
+        } else {
+            throw new IllegalArgumentException("Expected list or tag list: " + opt.get().getClass().getName());
+        }
     }
 }
