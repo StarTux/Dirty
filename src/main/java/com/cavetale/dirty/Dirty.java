@@ -119,6 +119,8 @@ public final class Dirty {
             return new NBTTagLong((Long)value);
         } else if (value instanceof Short) {
             return new NBTTagShort((Short)value);
+        } else if (value instanceof Byte) {
+            return new NBTTagByte((Byte)value);
         } else if (value instanceof Float) {
             return new NBTTagFloat((Float)value);
         } else if (value instanceof Double) {
