@@ -46,7 +46,9 @@ public final class Dirty {
      * recursively on Compounds and Lists.
      */
     public static Object fromTag(NBTBase value) {
-        if (value instanceof NBTTagCompound) {
+        if (value == null) {
+            return null;
+        } else if (value instanceof NBTTagCompound) {
             // Recursive
             NBTTagCompound tag = (NBTTagCompound)value;
             Map<String, Object> result = new HashMap<>();
@@ -97,7 +99,9 @@ public final class Dirty {
      * Maps and Lists.
      */
     public static NBTBase toTag(Object value) {
-        if (value instanceof Map) {
+        if (value == null) {
+            return null;
+        } else if (value instanceof Map) {
             // Recursive
             NBTTagCompound tag = new NBTTagCompound();
             for (Map.Entry<String, Object> e: ((Map<String, Object>)value).entrySet()) {
