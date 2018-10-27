@@ -57,8 +57,7 @@ public final class DirtyPlugin extends JavaPlugin implements Listener {
         case "item": {
             ItemStack item = player.getInventory().getItemInMainHand();
             if (item == null) item = new ItemStack(Material.AIR);
-            player.sendMessage("Item TAG of " + item.getType() + ":");
-            printTag(player, Dirty.getItemTag(item), options);
+            printTag(player, "Item TAG of " + item.getType() + ": ", Dirty.getItemTag(item), options);
             return true;
         }
         case "block": {
@@ -83,7 +82,7 @@ public final class DirtyPlugin extends JavaPlugin implements Listener {
         }
     }
 
-    private void printTag(Player player, Object tag, EnumSet<CommandOption> options) {
+    private void printTag(Player player, String prefix, Object tag, EnumSet<CommandOption> options) {
         Gson gson;
         if (options.contains(CommandOption.PRETTY)) {
             gson = new GsonBuilder().setPrettyPrinting().create();
@@ -91,7 +90,7 @@ public final class DirtyPlugin extends JavaPlugin implements Listener {
             gson = new Gson();
         }
         String json = gson.toJson(tag);
-        player.sendMessage(json);
+        player.sendMessage(prefix + json);
         if (options.contains(CommandOption.CONSOLE)) {
             getLogger().info(json);
             player.sendMessage("Also printed to console.");
@@ -118,8 +117,7 @@ public final class DirtyPlugin extends JavaPlugin implements Listener {
         Block block = event.getClickedBlock();
         if (block == null) return;
         event.setCancelled(true);
-        player.sendMessage("Block TAG of " + block.getType() + ":");
-        printTag(player, Dirty.getBlockTag(block), options);
+        printTag(player, "Block TAG of " + block.getBlockData().getAsString() + ": ", Dirty.getBlockTag(block), options);
     }
 
     @EventHandler
@@ -129,7 +127,6 @@ public final class DirtyPlugin extends JavaPlugin implements Listener {
         if (options == null) return;
         Entity entity = event.getRightClicked();
         event.setCancelled(true);
-        player.sendMessage("Entity TAG of " + entity.getType() + ":");
-        printTag(player, Dirty.getEntityTag(entity), options);
+        printTag(player, "Entity TAG of " + entity.getType() + ": ", Dirty.getEntityTag(entity), options);
     }
 }
