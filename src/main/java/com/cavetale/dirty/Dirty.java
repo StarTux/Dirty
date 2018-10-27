@@ -240,15 +240,18 @@ public final class Dirty {
 
     public static Optional<Object> accessItemNBT(org.bukkit.inventory.ItemStack bukkitItem, boolean create) {
         try {
-            if (!(bukkitItem instanceof CraftItemStack)) return null;
+            if (!(bukkitItem instanceof CraftItemStack)) return Optional.empty();
             CraftItemStack obcItem = (CraftItemStack)bukkitItem;
             getFieldCraftItemStackHandle().setAccessible(true);
             ItemStack nmsItem = (ItemStack)fieldCraftItemStackHandle.get(obcItem);
+            if (nmsItem == null) return Optional.empty();
             NBTTagCompound tag = nmsItem.getTag();
             if (tag == null) {
                 if (create) {
                     tag = new NBTTagCompound();
                     nmsItem.setTag(tag);
+                } else {
+                    return Optional.empty();
                 }
             }
             return Optional.of(tag);
@@ -284,19 +287,25 @@ public final class Dirty {
         if (!opt.isPresent()) throw new NullPointerException("Tag cannot be null");
         if (!(opt.get() instanceof NBTTagCompound)) throw new IllegalArgumentException("Expected tag compound: " + opt.get().getClass().getName());
         NBTTagCompound tag = (NBTTagCompound)opt.get();
-        return Optional.of(tag.get(key));
+        return Optional.ofNullable(tag.get(key));
     }
 
     public static Optional<Object> getNBT(Optional<Object> opt, int index) {
         if (!opt.isPresent()) throw new NullPointerException("Tag cannot be null");
         if (opt.get() instanceof NBTTagList) {
             NBTTagList tag = (NBTTagList)opt.get();
-            return Optional.of(tag.get(index));
+            return Optional.ofNullable(tag.get(index));
         } else if (opt.get() instanceof NBTList) {
             NBTList tag = (NBTList)opt.get();
-            return Optional.of(tag.get(index));
+            return Optional.ofNullable(tag.get(index));
         } else {
             throw new IllegalArgumentException("Expected list or tag list: " + opt.get().getClass().getName());
         }
+    }
+
+    public static Object fromNBT(Optional<Object> opt) {
+        Object o = opt.orElse(null);
+        if (o instanceof NBTBase) return fromTag((NBTBase)o);
+        return null;
     }
 }
