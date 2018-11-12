@@ -8,27 +8,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import net.minecraft.server.v1_13_R2.Entity;
-import net.minecraft.server.v1_13_R2.ItemStack;
-import net.minecraft.server.v1_13_R2.NBTBase;
-import net.minecraft.server.v1_13_R2.NBTList;
-import net.minecraft.server.v1_13_R2.NBTTagByte;
-import net.minecraft.server.v1_13_R2.NBTTagByteArray;
-import net.minecraft.server.v1_13_R2.NBTTagCompound;
-import net.minecraft.server.v1_13_R2.NBTTagDouble;
-import net.minecraft.server.v1_13_R2.NBTTagFloat;
-import net.minecraft.server.v1_13_R2.NBTTagInt;
-import net.minecraft.server.v1_13_R2.NBTTagIntArray;
-import net.minecraft.server.v1_13_R2.NBTTagList;
-import net.minecraft.server.v1_13_R2.NBTTagLong;
-import net.minecraft.server.v1_13_R2.NBTTagLongArray;
-import net.minecraft.server.v1_13_R2.NBTTagShort;
-import net.minecraft.server.v1_13_R2.NBTTagString;
-import net.minecraft.server.v1_13_R2.TileEntity;
-import org.bukkit.craftbukkit.v1_13_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_13_R2.block.CraftBlockEntityState;
-import org.bukkit.craftbukkit.v1_13_R2.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
+import net.minecraft.server.v1_12_R1.Entity;
+import net.minecraft.server.v1_12_R1.ItemStack;
+import net.minecraft.server.v1_12_R1.NBTBase;
+import net.minecraft.server.v1_12_R1.NBTTagByte;
+import net.minecraft.server.v1_12_R1.NBTTagByteArray;
+import net.minecraft.server.v1_12_R1.NBTTagCompound;
+import net.minecraft.server.v1_12_R1.NBTTagDouble;
+import net.minecraft.server.v1_12_R1.NBTTagFloat;
+import net.minecraft.server.v1_12_R1.NBTTagInt;
+import net.minecraft.server.v1_12_R1.NBTTagIntArray;
+import net.minecraft.server.v1_12_R1.NBTTagList;
+import net.minecraft.server.v1_12_R1.NBTTagLong;
+import net.minecraft.server.v1_12_R1.NBTTagLongArray;
+import net.minecraft.server.v1_12_R1.NBTTagShort;
+import net.minecraft.server.v1_12_R1.NBTTagString;
+import net.minecraft.server.v1_12_R1.TileEntity;
+import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_12_R1.block.CraftBlockEntityState;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
 
 /**
  * Utility class to get or set item, entity, or block NBT data.
@@ -52,7 +51,7 @@ public final class Dirty {
             // Recursive
             NBTTagCompound tag = (NBTTagCompound)value;
             Map<String, Object> result = new HashMap<>();
-            for (String key: tag.getKeys()) {
+            for (String key: tag.c()) {
                 result.put(key, fromTag(tag.get(key)));
             }
             return result;
@@ -65,7 +64,7 @@ public final class Dirty {
             }
             return result;
         } else if (value instanceof NBTTagString) {
-            return (String)((NBTTagString)value).b_();
+            return (String)((NBTTagString)value).c_();
         } else if (value instanceof NBTTagInt) {
             return (int)((NBTTagInt)value).e();
         } else if (value instanceof NBTTagLong) {
@@ -86,9 +85,9 @@ public final class Dirty {
         } else if (value instanceof NBTTagIntArray) {
             int[] l = (int[])((NBTTagIntArray)value).d();
             return Arrays.stream(l).boxed().collect(Collectors.toList());
-        } else if (value instanceof NBTTagLongArray) {
-            long[] l = (long[])((NBTTagLongArray)value).d();
-            return Arrays.stream(l).boxed().collect(Collectors.toList());
+        // } else if (value instanceof NBTTagLongArray) {
+        //     long[] l = (long[])((NBTTagLongArray)value).c();
+        //     return Arrays.stream(l).boxed().collect(Collectors.toList());
         } else {
             throw new IllegalArgumentException("TagWrapper.fromTag: Unsupported value type: " + value.getClass().getName());
         }
@@ -295,8 +294,8 @@ public final class Dirty {
         if (opt.get() instanceof NBTTagList) {
             NBTTagList tag = (NBTTagList)opt.get();
             return Optional.ofNullable(tag.get(index));
-        } else if (opt.get() instanceof NBTList) {
-            NBTList tag = (NBTList)opt.get();
+        } else if (opt.get() instanceof NBTTagList) {
+            NBTTagList tag = (NBTTagList)opt.get();
             return Optional.ofNullable(tag.get(index));
         } else {
             throw new IllegalArgumentException("Expected list or tag list: " + opt.get().getClass().getName());

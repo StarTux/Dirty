@@ -117,7 +117,7 @@ public final class DirtyPlugin extends JavaPlugin implements Listener {
         Block block = event.getClickedBlock();
         if (block == null) return;
         event.setCancelled(true);
-        printTag(player, "Block TAG of " + block.getBlockData().getAsString() + ": ", Dirty.getBlockTag(block), options);
+        printTag(player, "Block TAG of " + block.getType().name() + ": ", Dirty.getBlockTag(block), options);
     }
 
     @EventHandler

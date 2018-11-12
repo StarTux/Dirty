@@ -22,7 +22,7 @@
     <dependency>
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot</artifactId>
-      <version>1.13.1-R0.1-SNAPSHOT</version>
+      <version>1.12.2-R0.1-SNAPSHOT</version>
     </dependency>
     <!-- Lombok -->
     <dependency>
@@ -39,7 +39,7 @@
     </dependency>
   </dependencies>
   <build>
-    <finalName>${project.name}</finalName>
+    <finalName>${project.name}-1.12.2</finalName>
     <plugins>
       <!-- Java 8 -->
       <plugin>
