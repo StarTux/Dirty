@@ -42,8 +42,11 @@ public final class Dirty {
     // --- NBT-Container converstion
 
     /**
-     * Turn an NBT Tag into a corresponding Container object.  Works
+     * Turn an NBT into a corresponding Container object.  Works
      * recursively on Compounds and Lists.
+     *
+     * @param value The NBT value.
+     * @return value A raw value, such as Number, Boolean, String, Array, List, Map.
      */
     public static Object fromTag(NBTBase value) {
         if (value == null) {
@@ -95,8 +98,11 @@ public final class Dirty {
     }
 
     /**
-     * Turn any JSON object into an NBT tag.  Workd recursively on
+     * Turn any JSON object into an NBT.  Workd recursively on
      * Maps and Lists.
+     *
+     * @param value The raw value, such as Number, Boolean, String, Array, List, Map.
+     * @return An NBT structure.
      */
     public static NBTBase toTag(Object value) {
         if (value == null) {
@@ -154,8 +160,13 @@ public final class Dirty {
         return fieldCraftItemStackHandle;
     }
 
-    // --- Container getters and setters
+    // --- Item tags
 
+    /**
+     * Get an item's tag in container form, that is, transformed from
+     * NBT to Java language objects, ready to be saved as JSON or
+     * modified.
+     */
     public static Map<String, Object> getItemTag(org.bukkit.inventory.ItemStack bukkitItem) {
         try {
             if (!(bukkitItem instanceof CraftItemStack)) return null;
@@ -171,9 +182,35 @@ public final class Dirty {
     }
 
     /**
-     * This will return a new instance if `bukkitItem` is an instance
-     * of ItemStack instead of CraftItemStack, and possibly for other
-     * reasons.
+     * Completely serialize an item, including `id` and `Count`.  The
+     * result will be ready to be saved to JSON or deserialized, see
+     * below.
+     */
+    public Map<String, Object> serializeItem(org.bukkit.inventory.ItemStack bukkitItem) {
+        if (bukkitItem == null) throw new NullPointerException("bukkitItem cannot be null");
+        try {
+            ItemStack nmsItem;
+            if (bukkitItem instanceof CraftItemStack) {
+                CraftItemStack obcItem = (CraftItemStack)bukkitItem;
+                nmsItem = (ItemStack)this.fieldCraftItemStackHandle.get(obcItem);
+            } else {
+                nmsItem = CraftItemStack.asNMSCopy(bukkitItem);
+            }
+            NBTTagCompound tag = new NBTTagCompound();
+            nmsItem.save(tag);
+            return (Map<String, Object>)fromTag(tag);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * This will return a new instance if `bukkitItem` is not an
+     * instance of of CraftItemStack, and possibly for other reasons.
+     *
+     * To avoid that, create the ItemStack with one of the methods
+     * below, or retrieve them from a running Minecraft server.  In
+     * other words, do not just use the result of ItemStack::new.
      */
     public static org.bukkit.inventory.ItemStack setItemTag(org.bukkit.inventory.ItemStack bukkitItem, Map<String, Object> json) {
         try {
@@ -197,6 +234,8 @@ public final class Dirty {
             throw new RuntimeException(e);
         }
     }
+
+    // --- Block tags
 
     public static Map<String, Object> getBlockTag(org.bukkit.block.Block bukkitBlock) {
         CraftWorld craftWorld = (CraftWorld)bukkitBlock.getWorld();
@@ -223,6 +262,8 @@ public final class Dirty {
         return true;
     }
 
+    // --- Entity tags
+
     public static Map<String, Object> getEntityTag(org.bukkit.entity.Entity entity) {
         Entity nmsEntity = ((CraftEntity)entity).getHandle();
         NBTTagCompound tag = new NBTTagCompound();
@@ -236,7 +277,7 @@ public final class Dirty {
         nmsEntity.f(tag);
     }
 
-    // --- Item NBT access operations
+    // --- Item NBT access.  For now, will only work on items.
 
     public static Optional<Object> accessItemNBT(org.bukkit.inventory.ItemStack bukkitItem, boolean create) {
         try {
@@ -272,6 +313,15 @@ public final class Dirty {
 
     // --- NBT modification
 
+    /**
+     * Set a key-value pair in a compound.  This will wrap the value
+     * in the approproate NBTBase subclass.
+     *
+     * @param opt Optional wrapping NBTTagCompound.
+     * @param key The key.
+     * @param value The raw value, such as Number, Boolean, String, Array, List, Map.
+     * @throws IllegalArgumentException if opt does not wrap an NBTTagCompound.
+     */
     public static void setNBT(Optional<Object> opt, String key, Object value) {
         if (!opt.isPresent()) throw new NullPointerException("Tag cannot be null");
         if (!(opt.get() instanceof NBTTagCompound)) throw new IllegalArgumentException("Expected tag compound: " + opt.get().getClass().getName());
@@ -283,6 +333,44 @@ public final class Dirty {
         }
     }
 
+    /**
+     * Set a value at an index in an NBT list.  This will wrap the
+     * value in the approproate NBTBase subclass.
+     *
+     * @param opt Optional wrapping NBTTagList.
+     * @param index The index.
+     * @param value The raw value, such as Number, Boolean, String, Array, List, Map.
+     * @throws IllegalArgumentException if opt does not wrap an NBTTagList.
+     */
+    public static void setNBT(Optional<Object> opt, int index, Object value) {
+        if (!opt.isPresent()) throw new NullPointerException("Tag cannot be null");
+        if (!(opt.get() instanceof NBTTagList)) throw new IllegalArgumentException("Expected tag list: " + opt.get().getClass().getName());
+        NBTList<NBTBase> list = (NBTList<NBTBase>)opt.get();
+        list.set(index, toTag(value));
+    }
+
+    /**
+     * Append a value to an NBT list.  This will wrap the value in the
+     * approproate NBTBase subclass.
+     *
+     * @param opt Optional wrapping NBTTagList.
+     * @param value The raw value, such as Number, Boolean, String, Array, List, Map.
+     * @throws IllegalArgumentException if opt does not wrap an NBTTagList.
+     */
+    public static void addNBT(Optional<Object> opt, Object value) {
+        if (!opt.isPresent()) throw new NullPointerException("Tag cannot be null");
+        if (!(opt.get() instanceof NBTTagList)) throw new IllegalArgumentException("Expected tag list: " + opt.get().getClass().getName());
+        NBTList<NBTBase> list = (NBTList<NBTBase>)opt.get();
+        list.add(toTag(value));
+    }
+
+    /**
+     * Retrieve the value for a key from a compound.
+     *
+     * @param opt Optional wrapping NBTagCompound.
+     * @param key The key.
+     * @throws IllegalArgumentException if opt does not wrap an NBTTagCompound.
+     */
     public static Optional<Object> getNBT(Optional<Object> opt, String key) {
         if (!opt.isPresent()) throw new NullPointerException("Tag cannot be null");
         if (!(opt.get() instanceof NBTTagCompound)) throw new IllegalArgumentException("Expected tag compound: " + opt.get().getClass().getName());
@@ -290,6 +378,13 @@ public final class Dirty {
         return Optional.ofNullable(tag.get(key));
     }
 
+    /**
+     * Retrieve the value at an index from a list.
+     *
+     * @param opt Optional wrapping NBTagCompound.
+     * @param index The index.
+     * @throws IllegalArgumentException if opt does not wrap an NBTList.
+     */
     public static Optional<Object> getNBT(Optional<Object> opt, int index) {
         if (!opt.isPresent()) throw new NullPointerException("Tag cannot be null");
         if (opt.get() instanceof NBTTagList) {
@@ -303,6 +398,13 @@ public final class Dirty {
         }
     }
 
+    /**
+     * Turn an Optional wrapping any NBTBase subclass into a Java
+     * value, ready to be stored as JSON or modified.
+     *
+     * @param opt Optional wrapping NBTBase subclass.
+     * @return The Java contained Object or null.
+     */
     public static Object fromNBT(Optional<Object> opt) {
         Object o = opt.orElse(null);
         if (o instanceof NBTBase) return fromTag((NBTBase)o);
