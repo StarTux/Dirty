@@ -320,16 +320,20 @@ public final class Dirty {
      * @param opt Optional wrapping NBTTagCompound.
      * @param key The key.
      * @param value The raw value, such as Number, Boolean, String, Array, List, Map.
+     * @return The created NBT value.
      * @throws IllegalArgumentException if opt does not wrap an NBTTagCompound.
      */
-    public static void setNBT(Optional<Object> opt, String key, Object value) {
+    public static Optional<Object> setNBT(Optional<Object> opt, String key, Object value) {
         if (!opt.isPresent()) throw new NullPointerException("Tag cannot be null");
         if (!(opt.get() instanceof NBTTagCompound)) throw new IllegalArgumentException("Expected tag compound: " + opt.get().getClass().getName());
         NBTTagCompound tag = (NBTTagCompound)opt.get();
         if (value == null) {
             tag.remove(key);
+            return null;
         } else {
-            tag.set(key, toTag(value));
+            NBTBase result = toTag(value);
+            tag.set(key, result);
+            return Optional.of(result);
         }
     }
 
@@ -340,13 +344,16 @@ public final class Dirty {
      * @param opt Optional wrapping NBTTagList.
      * @param index The index.
      * @param value The raw value, such as Number, Boolean, String, Array, List, Map.
+     * @return The created NBT value.
      * @throws IllegalArgumentException if opt does not wrap an NBTTagList.
      */
-    public static void setNBT(Optional<Object> opt, int index, Object value) {
+    public static Optional<Object> setNBT(Optional<Object> opt, int index, Object value) {
         if (!opt.isPresent()) throw new NullPointerException("Tag cannot be null");
         if (!(opt.get() instanceof NBTTagList)) throw new IllegalArgumentException("Expected tag list: " + opt.get().getClass().getName());
         NBTList<NBTBase> list = (NBTList<NBTBase>)opt.get();
-        list.set(index, toTag(value));
+        NBTBase result = toTag(value);
+        list.set(index, result);
+        return Optional.of(result);
     }
 
     /**
@@ -355,13 +362,16 @@ public final class Dirty {
      *
      * @param opt Optional wrapping NBTTagList.
      * @param value The raw value, such as Number, Boolean, String, Array, List, Map.
+     * @return The added NBT value.
      * @throws IllegalArgumentException if opt does not wrap an NBTTagList.
      */
-    public static void addNBT(Optional<Object> opt, Object value) {
+    public static Optional<Object> addNBT(Optional<Object> opt, Object value) {
         if (!opt.isPresent()) throw new NullPointerException("Tag cannot be null");
         if (!(opt.get() instanceof NBTTagList)) throw new IllegalArgumentException("Expected tag list: " + opt.get().getClass().getName());
         NBTList<NBTBase> list = (NBTList<NBTBase>)opt.get();
-        list.add(toTag(value));
+        NBTBase result = toTag(value);
+        list.add(result);
+        return Optional.of(result);
     }
 
     /**
