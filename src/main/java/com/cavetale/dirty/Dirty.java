@@ -186,13 +186,13 @@ public final class Dirty {
      * result will be ready to be saved to JSON or deserialized, see
      * below.
      */
-    public Map<String, Object> serializeItem(org.bukkit.inventory.ItemStack bukkitItem) {
+    public static Map<String, Object> serializeItem(org.bukkit.inventory.ItemStack bukkitItem) {
         if (bukkitItem == null) throw new NullPointerException("bukkitItem cannot be null");
         try {
             ItemStack nmsItem;
             if (bukkitItem instanceof CraftItemStack) {
                 CraftItemStack obcItem = (CraftItemStack)bukkitItem;
-                nmsItem = (ItemStack)this.fieldCraftItemStackHandle.get(obcItem);
+                nmsItem = (ItemStack)fieldCraftItemStackHandle.get(obcItem);
             } else {
                 nmsItem = CraftItemStack.asNMSCopy(bukkitItem);
             }
