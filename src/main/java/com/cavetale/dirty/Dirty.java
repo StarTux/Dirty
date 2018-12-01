@@ -1,5 +1,6 @@
 package com.cavetale.dirty;
 
+import com.google.gson.Gson;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -202,6 +203,27 @@ public final class Dirty {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Deserialize a full item.
+     * @param json The JSON structure.
+     * @return The item.
+     */
+    public static org.bukkit.inventory.ItemStack deserializeItem(Map<String, Object> json) {
+        if (json == null) throw new NullPointerException("json cannot be null");
+        return ItemStack.a((NBTTagCompound)toTag(json)).asBukkitMirror();
+    }
+
+    /**
+     * Deserialize a full item.
+     * @param json The JSON string.
+     * @return The item.
+     */
+    public static org.bukkit.inventory.ItemStack deserializeItem(String json) {
+        if (json == null) throw new NullPointerException("json cannot be null");
+        Map<String, Object> map = (Map<String, Object>)new Gson().fromJson(json, Map.class);
+        return ItemStack.a((NBTTagCompound)toTag(map)).asBukkitMirror();
     }
 
     /**
