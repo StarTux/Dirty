@@ -69,19 +69,19 @@ public final class Dirty {
             }
             return result;
         } else if (value instanceof NBTTagString) {
-            return (String)((NBTTagString)value).b_();
+            return (String)((NBTTagString)value).asString();
         } else if (value instanceof NBTTagInt) {
-            return (int)((NBTTagInt)value).e();
+            return (int)((NBTTagInt)value).asInt();
         } else if (value instanceof NBTTagLong) {
-            return (long)((NBTTagLong)value).d();
+            return (long)((NBTTagLong)value).asLong();
         } else if (value instanceof NBTTagShort) {
-            return (short)((NBTTagShort)value).f();
+            return (short)((NBTTagShort)value).asShort();
         } else if (value instanceof NBTTagFloat) {
-            return (float)((NBTTagFloat)value).i();
+            return (float)((NBTTagFloat)value).asFloat();
         } else if (value instanceof NBTTagDouble) {
             return (double)((NBTTagDouble)value).asDouble();
         } else if (value instanceof NBTTagByte) {
-            return (byte)((NBTTagByte)value).g();
+            return (byte)((NBTTagByte)value).asByte();
         } else if (value instanceof NBTTagByteArray) {
             byte[] l = (byte[])((NBTTagByteArray)value).c();
             List<Byte> ls = new ArrayList<>(l.length);
