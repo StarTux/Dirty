@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import net.minecraft.server.v1_13_R2.BlockPosition;
 import net.minecraft.server.v1_13_R2.Entity;
 import net.minecraft.server.v1_13_R2.ItemStack;
 import net.minecraft.server.v1_13_R2.NBTBase;
@@ -261,7 +262,7 @@ public final class Dirty {
 
     public static Map<String, Object> getBlockTag(org.bukkit.block.Block bukkitBlock) {
         CraftWorld craftWorld = (CraftWorld)bukkitBlock.getWorld();
-        TileEntity tileEntity = craftWorld.getTileEntityAt(bukkitBlock.getX(), bukkitBlock.getY(), bukkitBlock.getZ());
+        TileEntity tileEntity = craftWorld.getHandle().getTileEntity(new BlockPosition(bukkitBlock.getX(), bukkitBlock.getY(), bukkitBlock.getZ()));
         if (tileEntity == null) return null;
         NBTTagCompound tag = new NBTTagCompound();
         tileEntity.save(tag);
@@ -277,7 +278,7 @@ public final class Dirty {
 
     public static boolean setBlockTag(org.bukkit.block.Block bukkitBlock, Map<String, Object> json) {
         CraftWorld craftWorld = (CraftWorld)bukkitBlock.getWorld();
-        TileEntity tileEntity = craftWorld.getTileEntityAt(bukkitBlock.getX(), bukkitBlock.getY(), bukkitBlock.getZ());
+        TileEntity tileEntity = craftWorld.getHandle().getTileEntity(new BlockPosition(bukkitBlock.getX(), bukkitBlock.getY(), bukkitBlock.getZ()));
         if (tileEntity == null) return false;
         NBTTagCompound tag = (NBTTagCompound)toTag(json);
         tileEntity.load(tag);
