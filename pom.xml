@@ -18,6 +18,7 @@
       <groupId>com.destroystokyo.paper</groupId>
       <artifactId>paper</artifactId>
       <version>1.13.2-R0.1-SNAPSHOT</version>
+      <optional>true</optional>
     </dependency>
     <!-- Lombok -->
     <dependency>
