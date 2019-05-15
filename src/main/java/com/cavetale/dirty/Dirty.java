@@ -307,4 +307,24 @@ public final class Dirty {
         if (o instanceof NBTBase) return fromTag((NBTBase)o);
         return null;
     }
+
+
+    // --- Item Util
+
+    public static org.bukkit.inventory.ItemStack makeSkull(String id, String texture) {
+        CraftItemStack result = newCraftItemStack(org.bukkit.Material.SKULL_ITEM);
+        result.setDurability((short)3);
+        Map<String, Object> tag = new HashMap<>();
+        Map<String, Object> skullOwnerTag = new HashMap<>();
+        Map<String, Object> propertiesTag = new HashMap<>();
+        List<Object> texturesList = new ArrayList<>();
+        Map<String, Object> texturesMap = new HashMap<>();
+        tag.put("SkullOwner", skullOwnerTag);
+        skullOwnerTag.put("Id", id);
+        skullOwnerTag.put("Properties", propertiesTag);
+        propertiesTag.put("textures", texturesList);
+        texturesList.add(texturesMap);
+        texturesMap.put("Value", texture);
+        return setItemTag(result, tag);
+    }
 }

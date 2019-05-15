@@ -4,39 +4,41 @@
   <groupId>com.cavetale.dirty</groupId>
   <artifactId>dirty</artifactId>
   <packaging>jar</packaging>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.1-paper1.12-SNAPSHOT</version>
   <name>Dirty</name>
   <url>https://www.cavetale.com</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <repositories>
-    <!-- Spigot Repo -->
+
+    <!-- Paper Repo -->
     <repository>
-      <id>spigot-repo</id>
-      <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+      <id>paper-repo</id>
+      <url>https://papermc.io/repo/repository/maven-public/</url>
     </repository>
+
   </repositories>
   <dependencies>
-    <!-- Spigot-API -->
+
+    <!-- Paper API -->
     <dependency>
-      <groupId>org.spigotmc</groupId>
-      <artifactId>spigot</artifactId>
+      <groupId>com.destroystokyo.paper</groupId>
+      <artifactId>paper</artifactId>
       <version>1.12.2-R0.1-SNAPSHOT</version>
+      <scope>provided</scope>
+      <optional>true</optional>
     </dependency>
+
     <!-- Lombok -->
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <version>1.14.8</version>
-      <scope>provided</scope>
+      <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
-    <!-- Plugin Annotations -->
-    <dependency>
-      <groupId>org.spigotmc</groupId>
-      <artifactId>plugin-annotations</artifactId>
-      <version>1.2.0-SNAPSHOT</version>
-    </dependency>
+
   </dependencies>
   <build>
     <finalName>${project.name}-1.12.2</finalName>
