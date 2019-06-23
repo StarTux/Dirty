@@ -41,7 +41,7 @@
 
   </dependencies>
   <build>
-    <finalName>${project.name}-1.12.2</finalName>
+    <finalName>${project.name}</finalName>
     <plugins>
       <!-- Java 8 -->
       <plugin>
