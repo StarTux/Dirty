@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.NonNull;
 import net.minecraft.server.v1_14_R1.BlockPosition;
 import net.minecraft.server.v1_14_R1.Entity;
 import net.minecraft.server.v1_14_R1.ItemStack;
@@ -48,7 +49,8 @@ public final class Dirty {
      * recursively on Compounds and Lists.
      *
      * @param value The NBT value.
-     * @return value A raw value, such as Number, Boolean, String, Array, List, Map.
+     * @return value A raw value, such as Number, Boolean, String,
+     * Array, List, Map.
      */
     public static Object fromTag(NBTBase value) {
         if (value == null) {
@@ -442,5 +444,24 @@ public final class Dirty {
         Object o = opt.orElse(null);
         if (o instanceof NBTBase) return fromTag((NBTBase)o);
         return null;
+    }
+
+    public org.bukkit.inventory.ItemStack makeSkull(@NonNull String id,
+                                                    @NonNull String texture) {
+        CraftItemStack result;
+        result = newCraftItemStack(org.bukkit.Material.PLAYER_HEAD);
+        result.setDurability((short)3);
+        Map<String, Object> tag = new HashMap<>();
+        Map<String, Object> skullOwnerTag = new HashMap<>();
+        Map<String, Object> propertiesTag = new HashMap<>();
+        List<Object> texturesList = new ArrayList<>();
+        Map<String, Object> texturesMap = new HashMap<>();
+        tag.put("SkullOwner", skullOwnerTag);
+        skullOwnerTag.put("Id", id);
+        skullOwnerTag.put("Properties", propertiesTag);
+        propertiesTag.put("textures", texturesList);
+        texturesList.add(texturesMap);
+        texturesMap.put("Value", texture);
+        return setItemTag(result, tag);
     }
 }
