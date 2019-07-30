@@ -446,11 +446,11 @@ public final class Dirty {
         return null;
     }
 
-    public org.bukkit.inventory.ItemStack makeSkull(@NonNull String id,
-                                                    @NonNull String texture) {
+    public static  org.bukkit.inventory.ItemStack
+        makeSkull(@NonNull String id,
+                  @NonNull String texture) {
         CraftItemStack result;
         result = newCraftItemStack(org.bukkit.Material.PLAYER_HEAD);
-        result.setDurability((short)3);
         Map<String, Object> tag = new HashMap<>();
         Map<String, Object> skullOwnerTag = new HashMap<>();
         Map<String, Object> propertiesTag = new HashMap<>();
