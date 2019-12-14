@@ -39,7 +39,7 @@ public final class DirtyPlugin extends JavaPlugin implements Listener {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 0) return false;
-        Player player = sender instanceof Player ? (Player)sender : null;
+        Player player = sender instanceof Player ? (Player) sender : null;
         if (player == null) {
             getLogger().info("Player expected");
             return true;
@@ -57,7 +57,8 @@ public final class DirtyPlugin extends JavaPlugin implements Listener {
         case "item": {
             ItemStack item = player.getInventory().getItemInMainHand();
             if (item == null) item = new ItemStack(Material.AIR);
-            printTag(player, "Item TAG of " + item.getType() + ": ", Dirty.getItemTag(item), options);
+            printTag(player, "Item TAG of " + item.getType() + ": ",
+                     Dirty.getItemTag(item), options);
             return true;
         }
         case "block": {
@@ -71,7 +72,8 @@ public final class DirtyPlugin extends JavaPlugin implements Listener {
             return true;
         }
         case "cancel": {
-            if (null == blockTool.remove(player.getUniqueId()) && null == entityTool.remove(player.getUniqueId())) {
+            if (null == blockTool.remove(player.getUniqueId())
+                && null == entityTool.remove(player.getUniqueId())) {
                 player.sendMessage("You had not tool active.");
             } else {
                 player.sendMessage("Lookup tool cancelled.");
@@ -82,7 +84,8 @@ public final class DirtyPlugin extends JavaPlugin implements Listener {
         }
     }
 
-    private void printTag(Player player, String prefix, Object tag, EnumSet<CommandOption> options) {
+    private void printTag(Player player, String prefix, Object tag,
+                          EnumSet<CommandOption> options) {
         Gson gson;
         if (options.contains(CommandOption.PRETTY)) {
             gson = new GsonBuilder().setPrettyPrinting().create();
@@ -98,13 +101,19 @@ public final class DirtyPlugin extends JavaPlugin implements Listener {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(CommandSender sender, Command command,
+                                      String alias, String[] args) {
         if (args.length == 0) return null;
         if (args.length == 1) {
-            return COMMANDS.stream().filter(i -> i.startsWith(args[0])).collect(Collectors.toList());
+            return COMMANDS.stream().filter(i -> i.startsWith(args[0]))
+                .collect(Collectors.toList());
         }
         if (args.length > 1 && COMMANDS.contains(args[0]) && !"cancel".equals(args[0])) {
-            return Arrays.stream(CommandOption.values()).map(Enum::name).map(String::toLowerCase).filter(i -> i.startsWith(args[args.length - 1])).collect(Collectors.toList());
+            return Arrays.stream(CommandOption.values())
+                .map(Enum::name)
+                .map(String::toLowerCase)
+                .filter(i -> i.startsWith(args[args.length - 1]))
+                .collect(Collectors.toList());
         }
         return Collections.emptyList();
     }
@@ -117,7 +126,8 @@ public final class DirtyPlugin extends JavaPlugin implements Listener {
         Block block = event.getClickedBlock();
         if (block == null) return;
         event.setCancelled(true);
-        printTag(player, "Block TAG of " + block.getBlockData().getAsString() + ": ", Dirty.getBlockTag(block), options);
+        printTag(player, "Block TAG of " + block.getBlockData().getAsString() + ": ",
+                 Dirty.getBlockTag(block), options);
     }
 
     @EventHandler
@@ -127,6 +137,7 @@ public final class DirtyPlugin extends JavaPlugin implements Listener {
         if (options == null) return;
         Entity entity = event.getRightClicked();
         event.setCancelled(true);
-        printTag(player, "Entity TAG of " + entity.getType() + ": ", Dirty.getEntityTag(entity), options);
+        printTag(player, "Entity TAG of " + entity.getType() + ": ",
+                 Dirty.getEntityTag(entity), options);
     }
 }
