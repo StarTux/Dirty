@@ -103,13 +103,13 @@ public final class Dirty {
     }
 
     /**
-     * Turn any JSON object into an NBT.  Workd recursively on
+     * Turn any JSON object into an NBT.  Works recursively on
      * Maps and Lists.
      *
      * @param value The raw value, such as Number, Boolean, String, Array, List, Map.
      * @return An NBT structure.
      */
-    public static NBTBase toTag(Object value) {
+    public static Object toTag(Object value) {
         if (value == null) {
             return null;
         } else if (value instanceof Map) {
@@ -118,7 +118,7 @@ public final class Dirty {
             @SuppressWarnings("unchecked")
             Map<String, Object> map = (Map<String, Object>) value;
             for (Map.Entry<String, Object> e: map.entrySet()) {
-                tag.set(e.getKey(), toTag(e.getValue()));
+                tag.set(e.getKey(), (NBTBase) toTag(e.getValue()));
             }
             return tag;
         } else if (value instanceof List) {
@@ -127,7 +127,7 @@ public final class Dirty {
             @SuppressWarnings("unchecked")
             List<Object> list = (List<Object>) value;
             for (Object e: (List<Object>) list) {
-                tag.add(toTag(e));
+                tag.add((NBTBase) toTag(e));
             }
             return tag;
         } else if (value instanceof String) {
@@ -352,11 +352,11 @@ public final class Dirty {
         }
     }
 
-    public static CraftItemStack newCraftItemStack(org.bukkit.Material bukkitMaterial) {
+    public static org.bukkit.inventory.ItemStack newCraftItemStack(org.bukkit.Material bukkitMaterial) {
         return CraftItemStack.asCraftCopy(new org.bukkit.inventory.ItemStack(bukkitMaterial));
     }
 
-    public static CraftItemStack toCraftItemStack(org.bukkit.inventory.ItemStack bukkitItem) {
+    public static org.bukkit.inventory.ItemStack toCraftItemStack(org.bukkit.inventory.ItemStack bukkitItem) {
         if (bukkitItem instanceof CraftItemStack) return (CraftItemStack) bukkitItem;
         ItemStack nmsItem = CraftItemStack.asNMSCopy(bukkitItem);
         return CraftItemStack.asCraftMirror(nmsItem);
@@ -385,7 +385,7 @@ public final class Dirty {
             tag.remove(key);
             return null;
         } else {
-            NBTBase result = toTag(value);
+            NBTBase result = (NBTBase) toTag(value);
             tag.set(key, result);
             return Optional.of(result);
         }
@@ -409,7 +409,7 @@ public final class Dirty {
         }
         @SuppressWarnings("unchecked")
         NBTList<NBTBase> list = (NBTList<NBTBase>) opt.get();
-        NBTBase result = toTag(value);
+        NBTBase result = (NBTBase) toTag(value);
         list.set(index, result);
         return Optional.of(result);
     }
@@ -431,7 +431,7 @@ public final class Dirty {
         }
         @SuppressWarnings("unchecked")
         NBTList<NBTBase> list = (NBTList<NBTBase>) opt.get();
-        NBTBase result = toTag(value);
+        NBTBase result = (NBTBase) toTag(value);
         list.add(result);
         return Optional.of(result);
     }
@@ -490,7 +490,7 @@ public final class Dirty {
     public static  org.bukkit.inventory.ItemStack makeSkull(@NonNull String id,
                                                             @NonNull String texture) {
         CraftItemStack result;
-        result = newCraftItemStack(org.bukkit.Material.PLAYER_HEAD);
+        result = (CraftItemStack) newCraftItemStack(org.bukkit.Material.PLAYER_HEAD);
         Map<String, Object> tag = new HashMap<>();
         Map<String, Object> skullOwnerTag = new HashMap<>();
         Map<String, Object> propertiesTag = new HashMap<>();
