@@ -86,12 +86,12 @@ public final class DirtyPlugin extends JavaPlugin implements Listener {
 
     private void printTag(Player player, String prefix, Object tag,
                           EnumSet<CommandOption> options) {
-        Gson gson;
+        GsonBuilder builder = new GsonBuilder()
+            .disableHtmlEscaping();
         if (options.contains(CommandOption.PRETTY)) {
-            gson = new GsonBuilder().setPrettyPrinting().create();
-        } else {
-            gson = new Gson();
+            builder.setPrettyPrinting();
         }
+        Gson gson = builder.create();
         String json = gson.toJson(tag);
         player.sendMessage(prefix + json);
         if (options.contains(CommandOption.CONSOLE)) {
