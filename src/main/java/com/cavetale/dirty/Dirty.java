@@ -10,28 +10,28 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.NonNull;
-import net.minecraft.server.v1_15_R1.BlockPosition;
-import net.minecraft.server.v1_15_R1.Entity;
-import net.minecraft.server.v1_15_R1.ItemStack;
-import net.minecraft.server.v1_15_R1.NBTBase;
-import net.minecraft.server.v1_15_R1.NBTList;
-import net.minecraft.server.v1_15_R1.NBTTagByte;
-import net.minecraft.server.v1_15_R1.NBTTagByteArray;
-import net.minecraft.server.v1_15_R1.NBTTagCompound;
-import net.minecraft.server.v1_15_R1.NBTTagDouble;
-import net.minecraft.server.v1_15_R1.NBTTagFloat;
-import net.minecraft.server.v1_15_R1.NBTTagInt;
-import net.minecraft.server.v1_15_R1.NBTTagIntArray;
-import net.minecraft.server.v1_15_R1.NBTTagList;
-import net.minecraft.server.v1_15_R1.NBTTagLong;
-import net.minecraft.server.v1_15_R1.NBTTagLongArray;
-import net.minecraft.server.v1_15_R1.NBTTagShort;
-import net.minecraft.server.v1_15_R1.NBTTagString;
-import net.minecraft.server.v1_15_R1.TileEntity;
-import org.bukkit.craftbukkit.v1_15_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_15_R1.block.CraftBlockEntityState;
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
+import net.minecraft.server.v1_16_R1.BlockPosition;
+import net.minecraft.server.v1_16_R1.Entity;
+import net.minecraft.server.v1_16_R1.ItemStack;
+import net.minecraft.server.v1_16_R1.NBTBase;
+import net.minecraft.server.v1_16_R1.NBTList;
+import net.minecraft.server.v1_16_R1.NBTTagByte;
+import net.minecraft.server.v1_16_R1.NBTTagByteArray;
+import net.minecraft.server.v1_16_R1.NBTTagCompound;
+import net.minecraft.server.v1_16_R1.NBTTagDouble;
+import net.minecraft.server.v1_16_R1.NBTTagFloat;
+import net.minecraft.server.v1_16_R1.NBTTagInt;
+import net.minecraft.server.v1_16_R1.NBTTagIntArray;
+import net.minecraft.server.v1_16_R1.NBTTagList;
+import net.minecraft.server.v1_16_R1.NBTTagLong;
+import net.minecraft.server.v1_16_R1.NBTTagLongArray;
+import net.minecraft.server.v1_16_R1.NBTTagShort;
+import net.minecraft.server.v1_16_R1.NBTTagString;
+import net.minecraft.server.v1_16_R1.TileEntity;
+import org.bukkit.craftbukkit.v1_16_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_16_R1.block.CraftBlockEntityState;
+import org.bukkit.craftbukkit.v1_16_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_16_R1.inventory.CraftItemStack;
 
 /**
  * Utility class to get or set item, entity, or block NBT data.
@@ -306,7 +306,7 @@ public final class Dirty {
         TileEntity tileEntity = craftWorld.getHandle().getTileEntity(pos);
         if (tileEntity == null) return false;
         NBTTagCompound tag = (NBTTagCompound) toTag(json);
-        tileEntity.load(tag);
+        tileEntity.load(tileEntity.getBlock(), tag);
         return true;
     }
 
@@ -324,7 +324,7 @@ public final class Dirty {
     public static void setEntityTag(org.bukkit.entity.Entity entity, Map<String, Object> json) {
         Entity nmsEntity = ((CraftEntity) entity).getHandle();
         NBTTagCompound tag = (NBTTagCompound) toTag(json);
-        nmsEntity.f(tag);
+        nmsEntity.load(tag);
     }
 
     // --- Item NBT access.  For now, will only work on items.
