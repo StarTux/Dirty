@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import net.minecraft.server.v1_16_R3.BlockPosition;
+import net.minecraft.server.v1_16_R3.Chunk;
 import net.minecraft.server.v1_16_R3.Entity;
 import net.minecraft.server.v1_16_R3.ItemStack;
 import net.minecraft.server.v1_16_R3.NBTBase;
@@ -27,7 +28,11 @@ import net.minecraft.server.v1_16_R3.NBTTagLong;
 import net.minecraft.server.v1_16_R3.NBTTagLongArray;
 import net.minecraft.server.v1_16_R3.NBTTagShort;
 import net.minecraft.server.v1_16_R3.NBTTagString;
+import net.minecraft.server.v1_16_R3.StructureBoundingBox;
+import net.minecraft.server.v1_16_R3.StructureGenerator;
+import net.minecraft.server.v1_16_R3.StructureStart;
 import net.minecraft.server.v1_16_R3.TileEntity;
+import org.bukkit.craftbukkit.v1_16_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_16_R3.block.CraftBlockEntityState;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
@@ -503,5 +508,44 @@ public final class Dirty {
         texturesList.add(texturesMap);
         texturesMap.put("Value", texture);
         return setItemTag(result, tag);
+    }
+
+    public static Map<String, Map<String, Object>> getStructures(org.bukkit.Chunk bukkitChunk) {
+        CraftChunk craftChunk = (CraftChunk) bukkitChunk;
+        Chunk nmsChunk = craftChunk.getHandle();
+        Map<StructureGenerator<?>, StructureStart<?>> structureMap = nmsChunk.h();
+        Map<String, Map<String, Object>> result = null;
+        for (Map.Entry<StructureGenerator<?>, StructureStart<?>> entry : structureMap.entrySet()) {
+            StructureGenerator<?> generator = entry.getKey();
+            StructureStart structure = entry.getValue();
+            StructureBoundingBox bb = structure.c();
+            String name = generator.i();
+            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> a = new HashMap<>();
+            Map<String, Object> b = new HashMap<>();
+            int ax = bb.getMinX();
+            if (ax == Integer.MIN_VALUE || ax == Integer.MAX_VALUE) continue;
+            int ay = bb.getMinY();
+            if (ay == Integer.MIN_VALUE || ay == Integer.MAX_VALUE) continue;
+            int az = bb.getMinZ();
+            if (az == Integer.MIN_VALUE || az == Integer.MAX_VALUE) continue;
+            int bx = bb.getMaxX();
+            if (bx == Integer.MIN_VALUE || bx == Integer.MAX_VALUE) continue;
+            int by = bb.getMaxY();
+            if (by == Integer.MIN_VALUE || by == Integer.MAX_VALUE) continue;
+            int bz = bb.getMaxZ();
+            if (bz == Integer.MIN_VALUE || bz == Integer.MAX_VALUE) continue;
+            a.put("x", ax);
+            a.put("y", ay);
+            a.put("z", az);
+            b.put("x", bx);
+            b.put("y", by);
+            b.put("z", bz);
+            map.put("min", a);
+            map.put("max", b);
+            if (result == null) result = new HashMap<>();
+            result.put(name, map);
+        }
+        return result;
     }
 }
