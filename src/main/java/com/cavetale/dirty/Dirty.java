@@ -510,19 +510,32 @@ public final class Dirty {
         return setItemTag(result, tag);
     }
 
-    public static Map<String, Map<String, Object>> getStructures(org.bukkit.Chunk bukkitChunk) {
+    /**
+     * Returns null or a list with the following format.
+     * [
+     *   {
+     *     name: "<minecraft structure name>",
+     *     min: {x: Int, y: Int, z: Int},
+     *     max: {x: Int, y: Int, z: Int}
+     *   },
+     *   ...
+     * ]
+     * So essentially a named bounding box.
+     * In the future, consider adding sub-BBs.
+     */
+    public static List<Map<String, Object>> getStructures(org.bukkit.Chunk bukkitChunk) {
         CraftChunk craftChunk = (CraftChunk) bukkitChunk;
         Chunk nmsChunk = craftChunk.getHandle();
         Map<StructureGenerator<?>, StructureStart<?>> structureMap = nmsChunk.h();
-        Map<String, Map<String, Object>> result = null;
+        List<Map<String, Object>> result = null;
         for (Map.Entry<StructureGenerator<?>, StructureStart<?>> entry : structureMap.entrySet()) {
             StructureGenerator<?> generator = entry.getKey();
             StructureStart structure = entry.getValue();
             StructureBoundingBox bb = structure.c();
             String name = generator.i();
             Map<String, Object> map = new HashMap<>();
-            Map<String, Object> a = new HashMap<>();
-            Map<String, Object> b = new HashMap<>();
+            Map<String, Object> min = new HashMap<>();
+            Map<String, Object> max = new HashMap<>();
             int ax = bb.getMinX();
             if (ax == Integer.MIN_VALUE || ax == Integer.MAX_VALUE) continue;
             int ay = bb.getMinY();
@@ -535,16 +548,17 @@ public final class Dirty {
             if (by == Integer.MIN_VALUE || by == Integer.MAX_VALUE) continue;
             int bz = bb.getMaxZ();
             if (bz == Integer.MIN_VALUE || bz == Integer.MAX_VALUE) continue;
-            a.put("x", ax);
-            a.put("y", ay);
-            a.put("z", az);
-            b.put("x", bx);
-            b.put("y", by);
-            b.put("z", bz);
-            map.put("min", a);
-            map.put("max", b);
-            if (result == null) result = new HashMap<>();
-            result.put(name, map);
+            min.put("x", ax);
+            min.put("y", ay);
+            min.put("z", az);
+            max.put("x", bx);
+            max.put("y", by);
+            max.put("z", bz);
+            map.put("min", min);
+            map.put("max", max);
+            map.put("name", name);
+            if (result == null) result = new ArrayList<>();
+            result.add(map);
         }
         return result;
     }
