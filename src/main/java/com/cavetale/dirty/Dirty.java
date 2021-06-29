@@ -10,33 +10,33 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.NonNull;
-import net.minecraft.server.v1_16_R3.BlockPosition;
-import net.minecraft.server.v1_16_R3.Chunk;
-import net.minecraft.server.v1_16_R3.Entity;
-import net.minecraft.server.v1_16_R3.ItemStack;
-import net.minecraft.server.v1_16_R3.NBTBase;
-import net.minecraft.server.v1_16_R3.NBTList;
-import net.minecraft.server.v1_16_R3.NBTTagByte;
-import net.minecraft.server.v1_16_R3.NBTTagByteArray;
-import net.minecraft.server.v1_16_R3.NBTTagCompound;
-import net.minecraft.server.v1_16_R3.NBTTagDouble;
-import net.minecraft.server.v1_16_R3.NBTTagFloat;
-import net.minecraft.server.v1_16_R3.NBTTagInt;
-import net.minecraft.server.v1_16_R3.NBTTagIntArray;
-import net.minecraft.server.v1_16_R3.NBTTagList;
-import net.minecraft.server.v1_16_R3.NBTTagLong;
-import net.minecraft.server.v1_16_R3.NBTTagLongArray;
-import net.minecraft.server.v1_16_R3.NBTTagShort;
-import net.minecraft.server.v1_16_R3.NBTTagString;
-import net.minecraft.server.v1_16_R3.StructureBoundingBox;
-import net.minecraft.server.v1_16_R3.StructureGenerator;
-import net.minecraft.server.v1_16_R3.StructureStart;
-import net.minecraft.server.v1_16_R3.TileEntity;
-import org.bukkit.craftbukkit.v1_16_R3.CraftChunk;
-import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R3.block.CraftBlockEntityState;
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
+import net.minecraft.core.BlockPosition;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTList;
+import net.minecraft.nbt.NBTTagByte;
+import net.minecraft.nbt.NBTTagByteArray;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagDouble;
+import net.minecraft.nbt.NBTTagFloat;
+import net.minecraft.nbt.NBTTagInt;
+import net.minecraft.nbt.NBTTagIntArray;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagLong;
+import net.minecraft.nbt.NBTTagLongArray;
+import net.minecraft.nbt.NBTTagShort;
+import net.minecraft.nbt.NBTTagString;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.TileEntity;
+import net.minecraft.world.level.chunk.Chunk;
+import net.minecraft.world.level.levelgen.feature.StructureGenerator;
+import net.minecraft.world.level.levelgen.structure.StructureBoundingBox;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
+import org.bukkit.craftbukkit.v1_17_R1.CraftChunk;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_17_R1.block.CraftBlockEntityState;
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 
 /**
  * Utility class to get or set item, entity, or block NBT data.
@@ -302,8 +302,7 @@ public final class Dirty {
         return map;
     }
 
-    public static boolean setBlockTag(org.bukkit.block.Block bukkitBlock,
-                                      Map<String, Object> json) {
+    public static boolean setBlockTag(org.bukkit.block.Block bukkitBlock, Map<String, Object> json) {
         CraftWorld craftWorld = (CraftWorld) bukkitBlock.getWorld();
         BlockPosition pos = new BlockPosition(bukkitBlock.getX(),
                                               bukkitBlock.getY(),
@@ -311,7 +310,7 @@ public final class Dirty {
         TileEntity tileEntity = craftWorld.getHandle().getTileEntity(pos);
         if (tileEntity == null) return false;
         NBTTagCompound tag = (NBTTagCompound) toTag(json);
-        tileEntity.load(tileEntity.getBlock(), tag);
+        tileEntity.load(tag);
         return true;
     }
 
@@ -526,27 +525,27 @@ public final class Dirty {
     public static List<Map<String, Object>> getStructures(org.bukkit.Chunk bukkitChunk) {
         CraftChunk craftChunk = (CraftChunk) bukkitChunk;
         Chunk nmsChunk = craftChunk.getHandle();
-        Map<StructureGenerator<?>, StructureStart<?>> structureMap = nmsChunk.h();
+        Map<StructureGenerator<?>, StructureStart<?>> structureMap = nmsChunk.g();
         List<Map<String, Object>> result = null;
         for (Map.Entry<StructureGenerator<?>, StructureStart<?>> entry : structureMap.entrySet()) {
             StructureGenerator<?> generator = entry.getKey();
             StructureStart structure = entry.getValue();
             StructureBoundingBox bb = structure.c();
-            String name = generator.i();
+            String name = generator.g();
             Map<String, Object> map = new HashMap<>();
             Map<String, Object> min = new HashMap<>();
             Map<String, Object> max = new HashMap<>();
-            int ax = bb.getMinX();
+            int ax = bb.g();
             if (ax == Integer.MIN_VALUE || ax == Integer.MAX_VALUE) continue;
-            int ay = bb.getMinY();
+            int ay = bb.h();
             if (ay == Integer.MIN_VALUE || ay == Integer.MAX_VALUE) continue;
-            int az = bb.getMinZ();
+            int az = bb.i();
             if (az == Integer.MIN_VALUE || az == Integer.MAX_VALUE) continue;
-            int bx = bb.getMaxX();
+            int bx = bb.j();
             if (bx == Integer.MIN_VALUE || bx == Integer.MAX_VALUE) continue;
-            int by = bb.getMaxY();
+            int by = bb.k();
             if (by == Integer.MIN_VALUE || by == Integer.MAX_VALUE) continue;
-            int bz = bb.getMaxZ();
+            int bz = bb.l();
             if (bz == Integer.MIN_VALUE || bz == Integer.MAX_VALUE) continue;
             min.put("x", ax);
             min.put("y", ay);
