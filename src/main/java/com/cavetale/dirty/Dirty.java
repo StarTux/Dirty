@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.NonNull;
+import lombok.Value;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTList;
@@ -31,6 +32,7 @@ import net.minecraft.world.level.block.entity.TileEntity;
 import net.minecraft.world.level.chunk.Chunk;
 import net.minecraft.world.level.levelgen.feature.StructureGenerator;
 import net.minecraft.world.level.levelgen.structure.StructureBoundingBox;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import org.bukkit.craftbukkit.v1_17_R1.CraftChunk;
 import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
@@ -509,55 +511,75 @@ public final class Dirty {
         return setItemTag(result, tag);
     }
 
+    @Value
+    static final class Box {
+        protected final List<Integer> min;
+        protected final List<Integer> max;
+
+        static Box of(StructureBoundingBox bb) {
+            int ax = bb.g();
+            if (ax == Integer.MIN_VALUE || ax == Integer.MAX_VALUE) return null;
+            int ay = bb.h();
+            if (ay == Integer.MIN_VALUE || ay == Integer.MAX_VALUE) return null;
+            int az = bb.i();
+            if (az == Integer.MIN_VALUE || az == Integer.MAX_VALUE) return null;
+            int bx = bb.j();
+            if (bx == Integer.MIN_VALUE || bx == Integer.MAX_VALUE) return null;
+            int by = bb.k();
+            if (by == Integer.MIN_VALUE || by == Integer.MAX_VALUE) return null;
+            int bz = bb.l();
+            if (bz == Integer.MIN_VALUE || bz == Integer.MAX_VALUE) return null;
+            return new Box(List.of(ax, ay, az), List.of(bx, by, bz));
+        }
+    }
+
+    @Value
+    static final class Structure {
+        protected final String name;
+        protected final Box bb;
+        protected final List<Box> bbs;
+    }
+
     /**
      * Returns null or a list with the following format.
      * [
      *   {
-     *     name: "<minecraft structure name>",
-     *     min: {x: Int, y: Int, z: Int},
-     *     max: {x: Int, y: Int, z: Int}
+     *     name: String,
+     *     bb: {
+     *       min: {x: Int, y: Int, z: Int},
+     *       max: {x: Int, y: Int, z: Int}
+     *       pieces: [
+     *         {
+     *           min: {x: Int, y: Int, z: Int},
+     *           max: {x: Int, y: Int, z: Int}
+     *         },
+     *       ]
+     *     },
      *   },
      *   ...
      * ]
      * So essentially a named bounding box.
      * In the future, consider adding sub-BBs.
      */
-    public static List<Map<String, Object>> getStructures(org.bukkit.Chunk bukkitChunk) {
+    public static List<Structure> getStructures(org.bukkit.Chunk bukkitChunk) {
         CraftChunk craftChunk = (CraftChunk) bukkitChunk;
         Chunk nmsChunk = craftChunk.getHandle();
         Map<StructureGenerator<?>, StructureStart<?>> structureMap = nmsChunk.g();
-        List<Map<String, Object>> result = null;
+        List<Structure> result = new ArrayList<>();
         for (Map.Entry<StructureGenerator<?>, StructureStart<?>> entry : structureMap.entrySet()) {
             StructureGenerator<?> generator = entry.getKey();
-            StructureStart structure = entry.getValue();
-            StructureBoundingBox bb = structure.c();
+            StructureStart structureStart = entry.getValue();
+            List<StructurePiece> structurePieceList = structureStart.d();
+            if (structurePieceList == null || structurePieceList.isEmpty()) continue;
             String name = generator.g();
-            Map<String, Object> map = new HashMap<>();
-            Map<String, Object> min = new HashMap<>();
-            Map<String, Object> max = new HashMap<>();
-            int ax = bb.g();
-            if (ax == Integer.MIN_VALUE || ax == Integer.MAX_VALUE) continue;
-            int ay = bb.h();
-            if (ay == Integer.MIN_VALUE || ay == Integer.MAX_VALUE) continue;
-            int az = bb.i();
-            if (az == Integer.MIN_VALUE || az == Integer.MAX_VALUE) continue;
-            int bx = bb.j();
-            if (bx == Integer.MIN_VALUE || bx == Integer.MAX_VALUE) continue;
-            int by = bb.k();
-            if (by == Integer.MIN_VALUE || by == Integer.MAX_VALUE) continue;
-            int bz = bb.l();
-            if (bz == Integer.MIN_VALUE || bz == Integer.MAX_VALUE) continue;
-            min.put("x", ax);
-            min.put("y", ay);
-            min.put("z", az);
-            max.put("x", bx);
-            max.put("y", by);
-            max.put("z", bz);
-            map.put("min", min);
-            map.put("max", max);
-            map.put("name", name);
-            if (result == null) result = new ArrayList<>();
-            result.add(map);
+            Box box = Box.of(structureStart.c());
+            if (box == null) continue;
+            List<Box> pieces = new ArrayList<>();
+            for (StructurePiece structurePiece : structurePieceList) {
+                StructureBoundingBox structurePieceBoundingBox = structurePiece.f();
+                pieces.add(Box.of(structurePieceBoundingBox));
+            }
+            result.add(new Structure(name, box, pieces));
         }
         return result;
     }

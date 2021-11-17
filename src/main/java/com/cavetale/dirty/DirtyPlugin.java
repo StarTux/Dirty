@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
@@ -23,7 +24,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class DirtyPlugin extends JavaPlugin implements Listener {
-    private static final List<String> COMMANDS = Arrays.asList("item", "block", "entity", "cancel");
+    private static final List<String> COMMANDS = Arrays.asList("item", "block", "entity", "cancel", "structures");
     private final HashMap<UUID, EnumSet<CommandOption>> blockTool = new HashMap<>();
     private final HashMap<UUID, EnumSet<CommandOption>> entityTool = new HashMap<>();
 
@@ -78,6 +79,14 @@ public final class DirtyPlugin extends JavaPlugin implements Listener {
             } else {
                 player.sendMessage("Lookup tool cancelled.");
             }
+            return true;
+        }
+        case "structures": {
+            Chunk chunk = player.getChunk();
+            var structures = Dirty.getStructures(chunk);
+            player.sendMessage("Structures in chunk "
+                               + chunk.getX() + "," + chunk.getZ()
+                               + ": " + new Gson().toJson(structures));
             return true;
         }
         default: return false;
