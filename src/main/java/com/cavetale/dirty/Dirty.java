@@ -3,17 +3,13 @@ package com.cavetale.dirty;
 import com.google.gson.Gson;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Set;
 import lombok.NonNull;
-import lombok.Value;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTList;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagByteArray;
 import net.minecraft.nbt.NBTTagCompound;
@@ -26,6 +22,7 @@ import net.minecraft.nbt.NBTTagLong;
 import net.minecraft.nbt.NBTTagLongArray;
 import net.minecraft.nbt.NBTTagShort;
 import net.minecraft.nbt.NBTTagString;
+import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.TileEntity;
@@ -34,11 +31,11 @@ import net.minecraft.world.level.levelgen.feature.StructureGenerator;
 import net.minecraft.world.level.levelgen.structure.StructureBoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
-import org.bukkit.craftbukkit.v1_17_R1.CraftChunk;
-import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_17_R1.block.CraftBlockEntityState;
-import org.bukkit.craftbukkit.v1_17_R1.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_18_R1.CraftChunk;
+import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_18_R1.block.CraftBlockEntityState;
+import org.bukkit.craftbukkit.v1_18_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
 
 /**
  * Utility class to get or set item, entity, or block NBT data.
@@ -48,8 +45,6 @@ import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 public final class Dirty {
     private static Field fieldCraftItemStackHandle = null;
     private Dirty() { }
-
-    // --- NBT-Container converstion
 
     /**
      * Turn an NBT into a corresponding Container object.  Works
@@ -66,8 +61,9 @@ public final class Dirty {
             // Recursive
             NBTTagCompound tag = (NBTTagCompound) value;
             Map<String, Object> result = new HashMap<>();
-            for (String key: tag.getKeys()) {
-                result.put(key, fromTag(tag.get(key)));
+            Set<String> keySet = tag.d(); // getKeys or getAllKeys
+            for (String key : keySet) {
+                result.put(key, fromTag(tag.p(key))); // get
             }
             return result;
         } else if (value instanceof NBTTagList) {
@@ -79,30 +75,28 @@ public final class Dirty {
             }
             return result;
         } else if (value instanceof NBTTagString) {
-            return (String) ((NBTTagString) value).asString();
+            return (String) ((NBTTagString) value).e_(); // asString
         } else if (value instanceof NBTTagInt) {
-            return (int) ((NBTTagInt) value).asInt();
+            return (int) ((NBTTagInt) value).f(); // asInt
         } else if (value instanceof NBTTagLong) {
-            return (long) ((NBTTagLong) value).asLong();
+            return (long) ((NBTTagLong) value).f(); // asLong
         } else if (value instanceof NBTTagShort) {
-            return (short) ((NBTTagShort) value).asShort();
+            return (short) ((NBTTagShort) value).g(); // asShort
         } else if (value instanceof NBTTagFloat) {
-            return (float) ((NBTTagFloat) value).asFloat();
+            return (float) ((NBTTagFloat) value).j(); // asFloat
         } else if (value instanceof NBTTagDouble) {
-            return (double) ((NBTTagDouble) value).asDouble();
+            return (double) ((NBTTagDouble) value).i(); // asDouble
         } else if (value instanceof NBTTagByte) {
-            return (byte) ((NBTTagByte) value).asByte();
+            return (byte) ((NBTTagByte) value).h(); // asByte
         } else if (value instanceof NBTTagByteArray) {
-            byte[] l = (byte[]) ((NBTTagByteArray) value).getBytes();
+            byte[] l = (byte[]) ((NBTTagByteArray) value).d(); // getBytes
             List<Byte> ls = new ArrayList<>(l.length);
             for (byte b: l) ls.add(b);
             return ls;
         } else if (value instanceof NBTTagIntArray) {
-            int[] l = (int[]) ((NBTTagIntArray) value).getInts();
-            return Arrays.stream(l).boxed().collect(Collectors.toList());
+            return (int[]) ((NBTTagIntArray) value).f(); // getInts
         } else if (value instanceof NBTTagLongArray) {
-            long[] l = (long[]) ((NBTTagLongArray) value).getLongs();
-            return Arrays.stream(l).boxed().collect(Collectors.toList());
+            return (long[]) ((NBTTagLongArray) value).f(); // getLongs
         } else {
             throw new IllegalArgumentException("TagWrapper.fromTag: Unsupported value type: "
                                                + value.getClass().getName());
@@ -125,7 +119,7 @@ public final class Dirty {
             @SuppressWarnings("unchecked")
             Map<String, Object> map = (Map<String, Object>) value;
             for (Map.Entry<String, Object> e: map.entrySet()) {
-                tag.set(e.getKey(), (NBTBase) toTag(e.getValue()));
+                tag.a(e.getKey(), (NBTBase) toTag(e.getValue())); // set
             }
             return tag;
         } else if (value instanceof List) {
@@ -177,8 +171,6 @@ public final class Dirty {
         return fieldCraftItemStackHandle;
     }
 
-    // --- Item tags
-
     /**
      * Get an item's tag in container form, that is, transformed from
      * NBT to Java language objects, ready to be saved as JSON or
@@ -191,7 +183,7 @@ public final class Dirty {
             getFieldCraftItemStackHandle().setAccessible(true);
             ItemStack nmsItem = (ItemStack) fieldCraftItemStackHandle.get(obcItem);
             if (nmsItem == null) return null;
-            NBTTagCompound tag = nmsItem.getTag();
+            NBTTagCompound tag = nmsItem.s(); // getTag
             @SuppressWarnings("unchecked")
             Map<String, Object> map = (Map<String, Object>) fromTag(tag);
             return map;
@@ -216,7 +208,7 @@ public final class Dirty {
                 nmsItem = CraftItemStack.asNMSCopy(bukkitItem);
             }
             NBTTagCompound tag = new NBTTagCompound();
-            nmsItem.save(tag);
+            nmsItem.b(tag); // save
             @SuppressWarnings("unchecked")
             Map<String, Object> map = (Map<String, Object>) fromTag(tag);
             return map;
@@ -272,24 +264,22 @@ public final class Dirty {
             //     nmsItem.setTag(new NBTTagCompound());
             // }
             NBTTagCompound tag = (NBTTagCompound) toTag(json);
-            nmsItem.setTag(tag);
+            nmsItem.c(tag); // setTag
             return obcItem;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    // --- Block tags
-
     public static Map<String, Object> getBlockTag(org.bukkit.block.Block bukkitBlock) {
         CraftWorld craftWorld = (CraftWorld) bukkitBlock.getWorld();
         BlockPosition pos = new BlockPosition(bukkitBlock.getX(),
                                               bukkitBlock.getY(),
                                               bukkitBlock.getZ());
-        TileEntity tileEntity = craftWorld.getHandle().getTileEntity(pos);
+        WorldServer worldServer = craftWorld.getHandle();
+        TileEntity tileEntity = worldServer.c_(pos); // getTileEntity
         if (tileEntity == null) return null;
-        NBTTagCompound tag = new NBTTagCompound();
-        tileEntity.save(tag);
+        NBTTagCompound tag = tileEntity.o(); // saveWithoutMetadata
         @SuppressWarnings("unchecked")
         Map<String, Object> map = (Map<String, Object>) fromTag(tag);
         return map;
@@ -309,19 +299,18 @@ public final class Dirty {
         BlockPosition pos = new BlockPosition(bukkitBlock.getX(),
                                               bukkitBlock.getY(),
                                               bukkitBlock.getZ());
-        TileEntity tileEntity = craftWorld.getHandle().getTileEntity(pos);
+        WorldServer worldServer = craftWorld.getHandle();
+        TileEntity tileEntity = worldServer.c_(pos); // getTileEntity
         if (tileEntity == null) return false;
         NBTTagCompound tag = (NBTTagCompound) toTag(json);
-        tileEntity.load(tag);
+        tileEntity.a(tag);
         return true;
     }
-
-    // --- Entity tags
 
     public static Map<String, Object> getEntityTag(org.bukkit.entity.Entity entity) {
         Entity nmsEntity = ((CraftEntity) entity).getHandle();
         NBTTagCompound tag = new NBTTagCompound();
-        nmsEntity.save(tag);
+        nmsEntity.serializeEntity(tag);
         @SuppressWarnings("unchecked")
         Map<String, Object> map = (Map<String, Object>) fromTag(tag);
         return map;
@@ -330,32 +319,7 @@ public final class Dirty {
     public static void setEntityTag(org.bukkit.entity.Entity entity, Map<String, Object> json) {
         Entity nmsEntity = ((CraftEntity) entity).getHandle();
         NBTTagCompound tag = (NBTTagCompound) toTag(json);
-        nmsEntity.load(tag);
-    }
-
-    // --- Item NBT access.  For now, will only work on items.
-
-    public static Optional<Object> accessItemNBT(org.bukkit.inventory.ItemStack bukkitItem,
-                                                 boolean create) {
-        try {
-            if (!(bukkitItem instanceof CraftItemStack)) return Optional.empty();
-            CraftItemStack obcItem = (CraftItemStack) bukkitItem;
-            getFieldCraftItemStackHandle().setAccessible(true);
-            ItemStack nmsItem = (ItemStack) fieldCraftItemStackHandle.get(obcItem);
-            if (nmsItem == null) return Optional.empty();
-            NBTTagCompound tag = nmsItem.getTag();
-            if (tag == null) {
-                if (create) {
-                    tag = new NBTTagCompound();
-                    nmsItem.setTag(tag);
-                } else {
-                    return Optional.empty();
-                }
-            }
-            return Optional.of(tag);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        nmsEntity.g(tag); // load
     }
 
     public static org.bukkit.inventory.ItemStack newCraftItemStack(org.bukkit.Material bukkitMaterial) {
@@ -366,131 +330,6 @@ public final class Dirty {
         if (bukkitItem instanceof CraftItemStack) return (CraftItemStack) bukkitItem;
         ItemStack nmsItem = CraftItemStack.asNMSCopy(bukkitItem);
         return CraftItemStack.asCraftMirror(nmsItem);
-    }
-
-    // --- NBT modification
-
-    /**
-     * Set a key-value pair in a compound.  This will wrap the value
-     * in the approproate NBTBase subclass.
-     *
-     * @param opt Optional wrapping NBTTagCompound.
-     * @param key The key.
-     * @param value The raw value, such as Number, Boolean, String, Array, List, Map.
-     * @return The created NBT value.
-     * @throws IllegalArgumentException if opt does not wrap an NBTTagCompound.
-     */
-    public static Optional<Object> setNBT(Optional<Object> opt, String key, Object value) {
-        if (!opt.isPresent()) throw new NullPointerException("Tag cannot be null");
-        if (!(opt.get() instanceof NBTTagCompound)) {
-            throw new IllegalArgumentException("Expected tag compound: "
-                                               + opt.get().getClass().getName());
-        }
-        NBTTagCompound tag = (NBTTagCompound) opt.get();
-        if (value == null) {
-            tag.remove(key);
-            return null;
-        } else {
-            NBTBase result = (NBTBase) toTag(value);
-            tag.set(key, result);
-            return Optional.of(result);
-        }
-    }
-
-    /**
-     * Set a value at an index in an NBT list.  This will wrap the
-     * value in the approproate NBTBase subclass.
-     *
-     * @param opt Optional wrapping NBTTagList.
-     * @param index The index.
-     * @param value The raw value, such as Number, Boolean, String, Array, List, Map.
-     * @return The created NBT value.
-     * @throws IllegalArgumentException if opt does not wrap an NBTTagList.
-     */
-    public static Optional<Object> setNBT(Optional<Object> opt, int index, Object value) {
-        if (!opt.isPresent()) throw new NullPointerException("Tag cannot be null");
-        if (!(opt.get() instanceof NBTTagList)) {
-            throw new IllegalArgumentException("Expected tag list: "
-                                               + opt.get().getClass().getName());
-        }
-        @SuppressWarnings("unchecked")
-        NBTList<NBTBase> list = (NBTList<NBTBase>) opt.get();
-        NBTBase result = (NBTBase) toTag(value);
-        list.set(index, result);
-        return Optional.of(result);
-    }
-
-    /**
-     * Append a value to an NBT list.  This will wrap the value in the
-     * approproate NBTBase subclass.
-     *
-     * @param opt Optional wrapping NBTTagList.
-     * @param value The raw value, such as Number, Boolean, String, Array, List, Map.
-     * @return The added NBT value.
-     * @throws IllegalArgumentException if opt does not wrap an NBTTagList.
-     */
-    public static Optional<Object> addNBT(Optional<Object> opt, Object value) {
-        if (!opt.isPresent()) throw new NullPointerException("Tag cannot be null");
-        if (!(opt.get() instanceof NBTTagList)) {
-            throw new IllegalArgumentException("Expected tag list: "
-                                               + opt.get().getClass().getName());
-        }
-        @SuppressWarnings("unchecked")
-        NBTList<NBTBase> list = (NBTList<NBTBase>) opt.get();
-        NBTBase result = (NBTBase) toTag(value);
-        list.add(result);
-        return Optional.of(result);
-    }
-
-    /**
-     * Retrieve the value for a key from a compound.
-     *
-     * @param opt Optional wrapping NBTagCompound.
-     * @param key The key.
-     * @throws IllegalArgumentException if opt does not wrap an NBTTagCompound.
-     */
-    public static Optional<Object> getNBT(Optional<Object> opt, String key) {
-        if (!opt.isPresent()) throw new NullPointerException("Tag cannot be null");
-        if (!(opt.get() instanceof NBTTagCompound)) {
-            throw new IllegalArgumentException("Expected tag compound: "
-                                               + opt.get().getClass().getName());
-        }
-        NBTTagCompound tag = (NBTTagCompound) opt.get();
-        return Optional.ofNullable(tag.get(key));
-    }
-
-    /**
-     * Retrieve the value at an index from a list.
-     *
-     * @param opt Optional wrapping NBTagCompound.
-     * @param index The index.
-     * @throws IllegalArgumentException if opt does not wrap an NBTList.
-     */
-    public static Optional<Object> getNBT(Optional<Object> opt, int index) {
-        if (!opt.isPresent()) throw new NullPointerException("Tag cannot be null");
-        if (opt.get() instanceof NBTTagList) {
-            NBTTagList tag = (NBTTagList) opt.get();
-            return Optional.ofNullable(tag.get(index));
-        } else if (opt.get() instanceof NBTList) {
-            NBTList tag = (NBTList) opt.get();
-            return Optional.ofNullable(tag.get(index));
-        } else {
-            throw new IllegalArgumentException("Expected list or tag list: "
-                                               + opt.get().getClass().getName());
-        }
-    }
-
-    /**
-     * Turn an Optional wrapping any NBTBase subclass into a Java
-     * value, ready to be stored as JSON or modified.
-     *
-     * @param opt Optional wrapping NBTBase subclass.
-     * @return The Java contained Object or null.
-     */
-    public static Object fromNBT(Optional<Object> opt) {
-        Object o = opt.orElse(null);
-        if (o instanceof NBTBase) return fromTag((NBTBase) o);
-        return null;
     }
 
     public static  org.bukkit.inventory.ItemStack makeSkull(@NonNull String id,
@@ -509,35 +348,6 @@ public final class Dirty {
         texturesList.add(texturesMap);
         texturesMap.put("Value", texture);
         return setItemTag(result, tag);
-    }
-
-    @Value
-    static final class Box {
-        protected final List<Integer> min;
-        protected final List<Integer> max;
-
-        static Box of(StructureBoundingBox bb) {
-            int ax = bb.g();
-            if (ax == Integer.MIN_VALUE || ax == Integer.MAX_VALUE) return null;
-            int ay = bb.h();
-            if (ay == Integer.MIN_VALUE || ay == Integer.MAX_VALUE) return null;
-            int az = bb.i();
-            if (az == Integer.MIN_VALUE || az == Integer.MAX_VALUE) return null;
-            int bx = bb.j();
-            if (bx == Integer.MIN_VALUE || bx == Integer.MAX_VALUE) return null;
-            int by = bb.k();
-            if (by == Integer.MIN_VALUE || by == Integer.MAX_VALUE) return null;
-            int bz = bb.l();
-            if (bz == Integer.MIN_VALUE || bz == Integer.MAX_VALUE) return null;
-            return new Box(List.of(ax, ay, az), List.of(bx, by, bz));
-        }
-    }
-
-    @Value
-    static final class Structure {
-        protected final String name;
-        protected final Box bb;
-        protected final List<Box> bbs;
     }
 
     /**
@@ -568,11 +378,11 @@ public final class Dirty {
         List<Structure> result = new ArrayList<>();
         for (Map.Entry<StructureGenerator<?>, StructureStart<?>> entry : structureMap.entrySet()) {
             StructureGenerator<?> generator = entry.getKey();
-            StructureStart structureStart = entry.getValue();
-            List<StructurePiece> structurePieceList = structureStart.d();
+            StructureStart<?> structureStart = entry.getValue();
+            List<StructurePiece> structurePieceList = structureStart.i();
             if (structurePieceList == null || structurePieceList.isEmpty()) continue;
-            String name = generator.g();
-            Box box = Box.of(structureStart.c());
+            String name = generator.f();
+            Box box = Box.of(structureStart.a());
             if (box == null) continue;
             List<Box> pieces = new ArrayList<>();
             for (StructurePiece structurePiece : structurePieceList) {
