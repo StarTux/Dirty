@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import lombok.NonNull;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.nbt.NBTBase;
@@ -57,46 +56,38 @@ public final class Dirty {
     public static Object fromTag(NBTBase value) {
         if (value == null) {
             return null;
-        } else if (value instanceof NBTTagCompound) {
-            // Recursive
-            NBTTagCompound tag = (NBTTagCompound) value;
+        } else if (value instanceof NBTTagCompound nbtTagCompound) {
             Map<String, Object> result = new HashMap<>();
-            Set<String> keySet = tag.d(); // getKeys or getAllKeys
-            for (String key : keySet) {
-                result.put(key, fromTag(tag.c(key))); // get
+            for (Map.Entry<String, NBTBase> entry : nbtTagCompound.x.entrySet()) {
+                result.put(entry.getKey(), fromTag(entry.getValue()));
             }
             return result;
-        } else if (value instanceof NBTTagList) {
-            // Recursive
-            NBTTagList tag = (NBTTagList) value;
+        } else if (value instanceof NBTTagList nbtTagList) {
             List<Object> result = new ArrayList<>();
-            for (int i = 0; i < tag.size(); i += 1) {
-                result.add(fromTag(tag.get(i)));
+            for (int i = 0; i < nbtTagList.size(); i += 1) {
+                result.add(fromTag(nbtTagList.get(i)));
             }
             return result;
-        } else if (value instanceof NBTTagString) {
-            return (String) ((NBTTagString) value).e_(); // asString
-        } else if (value instanceof NBTTagInt) {
-            return (int) ((NBTTagInt) value).f(); // asInt
-        } else if (value instanceof NBTTagLong) {
-            return (long) ((NBTTagLong) value).f(); // asLong
-        } else if (value instanceof NBTTagShort) {
-            return (short) ((NBTTagShort) value).g(); // asShort
-        } else if (value instanceof NBTTagFloat) {
-            return (float) ((NBTTagFloat) value).j(); // asFloat
-        } else if (value instanceof NBTTagDouble) {
-            return (double) ((NBTTagDouble) value).i(); // asDouble
-        } else if (value instanceof NBTTagByte) {
-            return (byte) ((NBTTagByte) value).h(); // asByte
-        } else if (value instanceof NBTTagByteArray) {
-            byte[] l = (byte[]) ((NBTTagByteArray) value).d(); // getBytes
-            List<Byte> ls = new ArrayList<>(l.length);
-            for (byte b: l) ls.add(b);
-            return ls;
-        } else if (value instanceof NBTTagIntArray) {
-            return (int[]) ((NBTTagIntArray) value).f(); // getInts
-        } else if (value instanceof NBTTagLongArray) {
-            return (long[]) ((NBTTagLongArray) value).f(); // getLongs
+        } else if (value instanceof NBTTagString nbtTagString) {
+            return (String) nbtTagString.e_(); // asString
+        } else if (value instanceof NBTTagInt nbtTagInt) {
+            return (int) nbtTagInt.f(); // asInt
+        } else if (value instanceof NBTTagLong nbtTagLong) {
+            return (long) nbtTagLong.f(); // asLong
+        } else if (value instanceof NBTTagShort nbtTagShort) {
+            return (short) nbtTagShort.g(); // asShort
+        } else if (value instanceof NBTTagFloat nbtTagFloat) {
+            return (float) nbtTagFloat.j(); // asFloat
+        } else if (value instanceof NBTTagDouble nbtTagDouble) {
+            return (double) nbtTagDouble.i(); // asDouble
+        } else if (value instanceof NBTTagByte nbtTagByte) {
+            return (byte) nbtTagByte.h(); // asByte
+        } else if (value instanceof NBTTagByteArray nbtTagByteArray) {
+            return (byte[]) nbtTagByteArray.d(); // getBytes
+        } else if (value instanceof NBTTagIntArray nbtTagIntArray) {
+            return (int[]) nbtTagIntArray.f(); // getInts
+        } else if (value instanceof NBTTagLongArray nbtTagLongArray) {
+            return (long[]) nbtTagLongArray.f(); // getLongs
         } else {
             throw new IllegalArgumentException("TagWrapper.fromTag: Unsupported value type: "
                                                + value.getClass().getName());
@@ -114,45 +105,43 @@ public final class Dirty {
         if (value == null) {
             return null;
         } else if (value instanceof Map) {
-            // Recursive
             NBTTagCompound tag = new NBTTagCompound();
             @SuppressWarnings("unchecked")
             Map<String, Object> map = (Map<String, Object>) value;
-            for (Map.Entry<String, Object> e: map.entrySet()) {
+            for (Map.Entry<String, Object> e : map.entrySet()) {
                 tag.a(e.getKey(), (NBTBase) toTag(e.getValue())); // set
             }
             return tag;
         } else if (value instanceof List) {
-            // Recursive
             NBTTagList tag = new NBTTagList();
             @SuppressWarnings("unchecked")
             List<Object> list = (List<Object>) value;
-            for (Object e: (List<Object>) list) {
+            for (Object e : (List<Object>) list) {
                 tag.add((NBTBase) toTag(e));
             }
             return tag;
-        } else if (value instanceof String) {
-            return NBTTagString.a((String) value);
-        } else if (value instanceof Integer) {
-            return NBTTagInt.a((Integer) value);
-        } else if (value instanceof Long) {
-            return NBTTagLong.a((Long) value);
-        } else if (value instanceof Short) {
-            return NBTTagShort.a((Short) value);
-        } else if (value instanceof Byte) {
-            return NBTTagByte.a((Byte) value);
-        } else if (value instanceof Float) {
-            return NBTTagFloat.a((Float) value);
-        } else if (value instanceof Double) {
-            return NBTTagDouble.a((Double) value);
-        } else if (value instanceof Boolean) {
-            return NBTTagInt.a(((Boolean) value) ? 1 : 0);
-        } else if (value instanceof byte[]) {
-            return new NBTTagByteArray((byte[]) value);
-        } else if (value instanceof int[]) {
-            return new NBTTagIntArray((int[]) value);
-        } else if (value instanceof long[]) {
-            return new NBTTagLongArray((long[]) value);
+        } else if (value instanceof String string) {
+            return NBTTagString.a(string);
+        } else if (value instanceof Integer integer) {
+            return NBTTagInt.a(integer);
+        } else if (value instanceof Long longValue) {
+            return NBTTagLong.a(longValue);
+        } else if (value instanceof Short shortValue) {
+            return NBTTagShort.a(shortValue);
+        } else if (value instanceof Byte byteValue) {
+            return NBTTagByte.a(byteValue);
+        } else if (value instanceof Float floatValue) {
+            return NBTTagFloat.a(floatValue);
+        } else if (value instanceof Double doubleValue) {
+            return NBTTagDouble.a(doubleValue);
+        } else if (value instanceof Boolean booleanValue) {
+            return NBTTagInt.a(booleanValue ? 1 : 0);
+        } else if (value instanceof byte[] byteArray) {
+            return new NBTTagByteArray(byteArray);
+        } else if (value instanceof int[] intArray) {
+            return new NBTTagIntArray(intArray);
+        } else if (value instanceof long[] longArray) {
+            return new NBTTagLongArray(longArray);
         } else {
             throw new IllegalArgumentException("TagWrapper.toTag: Unsupported value type: "
                                                + value.getClass().getName());
