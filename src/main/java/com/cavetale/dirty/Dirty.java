@@ -63,7 +63,7 @@ public final class Dirty {
             Map<String, Object> result = new HashMap<>();
             Set<String> keySet = tag.d(); // getKeys or getAllKeys
             for (String key : keySet) {
-                result.put(key, fromTag(tag.p(key))); // get
+                result.put(key, fromTag(tag.c(key))); // get
             }
             return result;
         } else if (value instanceof NBTTagList) {
