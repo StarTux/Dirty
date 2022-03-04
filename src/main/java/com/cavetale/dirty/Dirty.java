@@ -26,15 +26,15 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.TileEntity;
 import net.minecraft.world.level.chunk.Chunk;
-import net.minecraft.world.level.levelgen.feature.StructureGenerator;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureBoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
-import org.bukkit.craftbukkit.v1_18_R1.CraftChunk;
-import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_18_R1.block.CraftBlockEntityState;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_18_R2.CraftChunk;
+import org.bukkit.craftbukkit.v1_18_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_18_R2.block.CraftBlockEntityState;
+import org.bukkit.craftbukkit.v1_18_R2.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_18_R2.inventory.CraftItemStack;
 
 /**
  * Utility class to get or set item, entity, or block NBT data.
@@ -172,7 +172,7 @@ public final class Dirty {
             getFieldCraftItemStackHandle().setAccessible(true);
             ItemStack nmsItem = (ItemStack) fieldCraftItemStackHandle.get(obcItem);
             if (nmsItem == null) return null;
-            NBTTagCompound tag = nmsItem.s(); // getTag
+            NBTTagCompound tag = nmsItem.t(); // getTag
             @SuppressWarnings("unchecked")
             Map<String, Object> map = (Map<String, Object>) fromTag(tag);
             return map;
@@ -363,14 +363,14 @@ public final class Dirty {
     public static List<Structure> getStructures(org.bukkit.Chunk bukkitChunk) {
         CraftChunk craftChunk = (CraftChunk) bukkitChunk;
         Chunk nmsChunk = craftChunk.getHandle();
-        Map<StructureGenerator<?>, StructureStart<?>> structureMap = nmsChunk.g();
+        Map<StructureFeature<?, ?>, StructureStart> structureMap = nmsChunk.g();
         List<Structure> result = new ArrayList<>();
-        for (Map.Entry<StructureGenerator<?>, StructureStart<?>> entry : structureMap.entrySet()) {
-            StructureGenerator<?> generator = entry.getKey();
-            StructureStart<?> structureStart = entry.getValue();
+        for (Map.Entry<StructureFeature<?, ?>, StructureStart> entry : structureMap.entrySet()) {
+            StructureFeature<?, ?> feature = entry.getKey();
+            StructureStart structureStart = entry.getValue();
             List<StructurePiece> structurePieceList = structureStart.i();
             if (structurePieceList == null || structurePieceList.isEmpty()) continue;
-            String name = generator.f();
+            String name = "?"; // feature.e.f(); // TODO
             Box box = Box.of(structureStart.a());
             if (box == null) continue;
             List<Box> pieces = new ArrayList<>();
