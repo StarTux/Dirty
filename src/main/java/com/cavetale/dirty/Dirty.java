@@ -370,7 +370,10 @@ public final class Dirty {
             StructureStart structureStart = entry.getValue();
             List<StructurePiece> structurePieceList = structureStart.i();
             if (structurePieceList == null || structurePieceList.isEmpty()) continue;
-            String name = "?"; // feature.e.f(); // TODO
+            String name = feature.d.getClass().getSimpleName();
+            if (name.startsWith("WorldGen")) name = name.substring(8);
+            if (name.startsWith("Feature")) name = name.substring(7);
+            name = Util.camelToSnakeCase(name);
             Box box = Box.of(structureStart.a());
             if (box == null) continue;
             List<Box> pieces = new ArrayList<>();

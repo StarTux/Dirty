@@ -87,6 +87,9 @@ public final class DirtyPlugin extends JavaPlugin implements Listener {
             player.sendMessage("Structures in chunk "
                                + chunk.getX() + "," + chunk.getZ()
                                + ": " + new Gson().toJson(structures));
+            for (var it : structures) {
+                player.sendMessage("Name: " + it.name);
+            }
             return true;
         }
         default: return false;
