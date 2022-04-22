@@ -4,7 +4,7 @@
   <groupId>com.cavetale.dirty</groupId>
   <artifactId>dirty</artifactId>
   <packaging>jar</packaging>
-  <version>0.1-paper1.12-SNAPSHOT</version>
+  <version>1.12.2-SNAPSHOT</version>
   <name>Dirty</name>
   <url>https://www.cavetale.com</url>
   <properties>
