@@ -1,7 +1,7 @@
 main: com.cavetale.dirty.DirtyPlugin
 name: Dirty
 version: 0.1
-api-version: 1.18
+api-version: 1.19
 description: Quick and dirty access to NBT and CBS code
 author: StarTux
 website: https://github.com/StarTux/Dirty

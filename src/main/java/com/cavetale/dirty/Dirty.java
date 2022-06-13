@@ -26,15 +26,15 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.TileEntity;
 import net.minecraft.world.level.chunk.Chunk;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureBoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
-import org.bukkit.craftbukkit.v1_18_R2.CraftChunk;
-import org.bukkit.craftbukkit.v1_18_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_18_R2.block.CraftBlockEntityState;
-import org.bukkit.craftbukkit.v1_18_R2.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_18_R2.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_19_R1.CraftChunk;
+import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_19_R1.block.CraftBlockEntityState;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
 
 /**
  * Utility class to get or set item, entity, or block NBT data.
@@ -172,7 +172,7 @@ public final class Dirty {
             getFieldCraftItemStackHandle().setAccessible(true);
             ItemStack nmsItem = (ItemStack) fieldCraftItemStackHandle.get(obcItem);
             if (nmsItem == null) return null;
-            NBTTagCompound tag = nmsItem.t(); // getTag
+            NBTTagCompound tag = nmsItem.u(); // getTag
             @SuppressWarnings("unchecked")
             Map<String, Object> map = (Map<String, Object>) fromTag(tag);
             return map;
@@ -360,19 +360,18 @@ public final class Dirty {
      * So essentially a named bounding box.
      * In the future, consider adding sub-BBs.
      */
-    public static List<Structure> getStructures(org.bukkit.Chunk bukkitChunk) {
+    public static List<com.cavetale.dirty.Structure> getStructures(org.bukkit.Chunk bukkitChunk) {
         CraftChunk craftChunk = (CraftChunk) bukkitChunk;
         Chunk nmsChunk = craftChunk.getHandle();
-        Map<StructureFeature<?, ?>, StructureStart> structureMap = nmsChunk.g();
-        List<Structure> result = new ArrayList<>();
-        for (Map.Entry<StructureFeature<?, ?>, StructureStart> entry : structureMap.entrySet()) {
-            StructureFeature<?, ?> feature = entry.getKey();
+        Map<Structure, StructureStart> structureMap = nmsChunk.g();
+        List<com.cavetale.dirty.Structure> result = new ArrayList<>();
+        for (Map.Entry<Structure, StructureStart> entry : structureMap.entrySet()) {
+            Structure structure = entry.getKey();
             StructureStart structureStart = entry.getValue();
             List<StructurePiece> structurePieceList = structureStart.i();
             if (structurePieceList == null || structurePieceList.isEmpty()) continue;
-            String name = feature.d.getClass().getSimpleName();
-            if (name.startsWith("WorldGen")) name = name.substring(8);
-            if (name.startsWith("Feature")) name = name.substring(7);
+            String name = structure.getClass().getSimpleName();
+            if (name.endsWith("Structure")) name = name.substring(0, name.length() - 9);
             name = Util.camelToSnakeCase(name);
             Box box = Box.of(structureStart.a());
             if (box == null) continue;
@@ -381,7 +380,7 @@ public final class Dirty {
                 StructureBoundingBox structurePieceBoundingBox = structurePiece.f();
                 pieces.add(Box.of(structurePieceBoundingBox));
             }
-            result.add(new Structure(name, box, pieces));
+            result.add(new com.cavetale.dirty.Structure(name, box, pieces));
         }
         return result;
     }
